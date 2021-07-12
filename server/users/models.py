@@ -25,7 +25,7 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     # Reference to managers object
     objects = BaseUserManager()
-
+    
     class Meta:
         ordering = ['-created_at']
         verbose_name = _('User')
