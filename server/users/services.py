@@ -1,3 +1,4 @@
+from server.users.selectors import user_by_id
 from .models import BaseUser
 
 
@@ -14,4 +15,9 @@ def user_create(*,
         password=password
     )
 
-    return user 
+    return user
+
+def user_update_profile(*, user_id:int, data)->BaseUser:
+    user = user_by_id(id=user_id)
+    return user
+

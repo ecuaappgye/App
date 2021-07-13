@@ -6,13 +6,18 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BaseUser(AbstractBaseUser, PermissionsMixin):
-    first_name = models.CharField(max_length=120)
-    last_name = models.CharField(max_length=120)
-
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=20)
+    address = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(unique=True)
+    avatar = models.ImageField(upload_to="avatar", null=True, blank=True)
 
+    # Check if admin of active to session
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+
+    rol = models.ForeignKey("users.Rol", null=True, blank=True, on_delete=models.CASCADE)
+    document = models.ForeignKey("users.Document", null=True, blank=True, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -45,5 +50,40 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     def is_staff(self):
         return self.is_admin
 
+
+
+class Rol(models.Model):
+    name = models.CharField(max_length=20)
+    description = models.CharField(max_length=100,
+        help_text="Descripción de tareas a realizar por el rol.")
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Rol')
+        verbose_name_plural = _('Roles')
+
+    def __str__(self)-> str:
+        return "Rol %s" % self.name
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    
+class Document(models.Model):
+    cedula_img = models.ImageField(upload_to="cedula_img")
+    licencia_img = models.ImageField(upload_to="licencia_img")
+    matricula_img = models.ImageField(upload_to="matricula_img")
+
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Document')
+        verbose_name_plural = _('Documents')
 
 
