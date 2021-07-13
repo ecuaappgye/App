@@ -30,6 +30,9 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     # Reference to managers object
     objects = BaseUserManager()
+
+    DRIVER = "conductor"
+    CLIENT = "cliente"
     
     class Meta:
         ordering = ['-created_at']
@@ -47,8 +50,28 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
         full_name = "%s %s" % (self.first_name.title(), self.last_name.title())
         return full_name.strip()
 
+    @property
+    def rol_name(self):
+        if not self.rol:
+            return None
+        return self.rol.name
+
+    @ property
+    def is_driver(self):
+        if not self.rol:
+            return None
+        return self.rol.name.lower() == self.DRIVER
+    
+    @ property
+    def is_client(self):
+        if not self.rol:
+            return None
+        return self.rol.name.lower() == self.CLIENT
+
     def is_staff(self):
         return self.is_admin
+
+        
 
 
 

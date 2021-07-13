@@ -3,8 +3,10 @@ from .models import BaseUser, Rol, Document
 
 class BaseUserAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
-    list_display = ("full_name", "email", "created_at")
+    list_display = ("full_name", "email", "rol_name", "created_at")
     search_fields = ("email",)
+    list_filter = ['created_at']
+
 admin.site.register(BaseUser, BaseUserAdmin)
 
 class RolAdmin(admin.ModelAdmin):

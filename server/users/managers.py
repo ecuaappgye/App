@@ -10,6 +10,7 @@ class BaseUserManager(BUM):
         last_name, 
         email, 
         password,
+        avatar,
         is_active=True,
         is_admin=False):
 
@@ -21,7 +22,8 @@ class BaseUserManager(BUM):
             last_name= last_name,
             email=self.normalize_email(email),
             is_admin=is_admin,
-            is_active=is_active)
+            is_active=is_active,
+            avatar=avatar)
 
         if password is not None:
             validate_password(password=password, user=user)
