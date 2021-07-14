@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
-from server.users.services import user_create, user_password_reset, user_update_profile, user_password_reset
+from server.users.services import user_create, user_email_change, user_password_change, user_password_reset, user_password_reset_check, user_update_profile, user_password_reset
 from server.users.selectors import user_data
 from server.api.mixins import ApiErrorsMixin, ApiAuthMixin
 from django.contrib.auth import authenticate, login, logout
@@ -54,7 +54,7 @@ class UserLogoutApi(ApiAuthMixin, APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class UserUpdateProfile(APIView):
+class UserUpdateProfile(ApiErrorsMixin, ApiAuthMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         first_name = serializers.CharField(required=False)
         last_name = serializers.CharField(required=False)
@@ -70,7 +70,7 @@ class UserUpdateProfile(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class UserPasswordReset(APIView):
+class UserPasswordReset(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         email = serializers.EmailField()
     
@@ -82,7 +82,51 @@ class UserPasswordReset(APIView):
 
         return Response(status=status.HTTP_201_CREATED)
 
-        
+
+class UserPasswordResetCheck(ApiErrorsMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        token = serializers.CharField()
+        new_password = serializers.CharField()
+        password_confirm = serializers.CharField()
+
+    def post(self, request):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_password_reset_check(**serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class UserPasswordChange(ApiErrorsMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        old_password = serializers.CharField()
+        new_password = serializers.CharField()
+        password_confirm = serializers.CharField()
+
+    def post(self, request, user_id):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_password_change(user_id=user_id, **serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class UserEmailChange(ApiErrorsMixin, ApiAuthMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+    
+    def post(self, request, user_id):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_email_change(user_id=user_id, **serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+
 
 
 

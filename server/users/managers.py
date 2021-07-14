@@ -38,7 +38,16 @@ class BaseUserManager(BUM):
         last_name, 
         email, 
         password):
-        user = self.create_user(first_name, last_name, email, password, is_active=True, is_admin=True)
+        
+        user = self.create_user(
+            first_name, 
+            last_name, 
+            email, 
+            password, 
+            avatar=None,
+            is_active=True,
+            is_admin=True)
+
         user.is_superuser = True
         user.save(using=self._db)
 

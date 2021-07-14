@@ -1,7 +1,12 @@
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core.exceptions import ValidationError
+from django.db.models.query import ValuesIterable
+from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from server.users.selectors import user_by_email, user_by_id
-from django.utils.encoding import smart_bytes
+
 from .models import BaseUser
+from .utils import validate_password
 
 
 def user_create(*,
@@ -29,23 +34,155 @@ def user_create(*,
 
 
 def user_update_profile(*, user_id:int, data)->BaseUser:
-
     user = user_by_id(id=user_id)
+
+    valid_fields =[
+        "first_name",
+        "last_name",
+        "address",
+        "avatar"
+    ]
+
+    for field in valid_fields:
+        print(field)
 
     return user
 
 
 def user_password_reset(*, email:str)->BaseUser:
-   user = user_by_email(email=email)
+    """Servicio que permite enviar un correo electrónico con
+    un token para el reestablecimiento de contraseña. En en caso
+    de que el correo no sea válido se enviara un error.
 
-   token = user_make_token(user_id=user.id)
+    Parámetros:
+    email -> Correo electrónico del usuario
+    """
+    token = user_make_token(email=email)
+    print(token)
+    # Envio de notificación mediante servicio de mensajeria o correo.
+    #....pendiente
+    
+    return token
 
-   # Avanzar la concatenación url
 
-   return user
+def user_password_reset_check(*, token:str, new_password:str, password_confirm:str):
+    """Servicio que permite revisar el token y la nueva contraseña para poder
+    actualizar su nueva contraseña.
+    
+    Parámetros:
+    token -> Código de verificación
+    new_password -> Nueva contraseña
+    password_confirm -> Nueva contraseña confirmación
+    """
+    token_user = user_extract_token(token=token)
+    uidb64 = user_extract_uidb64(token=token)
 
+    user = user_check_token(uidb64=uidb64, token=token_user)
 
-def user_make_token(*, user_id:int):
-    user = urlsafe_base64_encode(smart_bytes(user_id))
+    if new_password != password_confirm:
+        raise ValidationError("Contraseñas no coinciden")
+
+    # Validar contraseña con las respectivas limitaciones.
+    # UserAttributeSimilarityValidator
+    # MinimumLengthValidator
+    # CommonPasswordValidator
+    # NumericPasswordValidator
+    validate_password(password=new_password, user=user.email)
+
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
 
     return user
+
+
+def user_password_change(*, user_id:int, old_password:str, new_password:str, password_confirm):
+    user = user_by_id(id=user_id)
+
+    if new_password != password_confirm:
+        raise ValidationError("Contraseñas no coinciden.")
+    
+    # Validar si la contraseña enviada es válida
+    if not user.check_password(old_password):
+        raise ValidationError("Contraseña anterior no es válida.")
+
+    validate_password(password=new_password, user=user)
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
+
+    return user
+
+
+def user_email_change(*, user_id, email):
+    user = user_by_id(id=user_id)
+    user.email = email
+    user.save(update_fields=["email"])
+
+    return user
+
+
+# =================
+# Services methods
+# =================
+
+def user_extract_uidb64(*, token: str) -> str:
+    separator = '_'
+    try:
+        # Remover espacios en blanco
+        token_strip = token.strip()
+        # Encontrar separador
+        extract_uidb64 = token_strip.find(separator)
+        if not extract_uidb64 != -1:
+            raise ValidationError('Código inválido.')
+
+        return token[extract_uidb64 + 1:]
+
+    except:
+        raise ValidationError('Código inválido.')
+
+
+def user_extract_token(*, token: str) -> str:
+    separator = '_'
+    try:
+        # Remover espacios en blanco del token.
+        token_strip = token.strip()
+        # Encontrar el separador dentro del token. 
+        extract_token = token_strip.find(separator)
+        if not extract_token != -1:
+            raise ValidationError('Código inválido.')
+
+        return token[:extract_token]
+
+    except Exception:
+        raise ValidationError('Código inválido.')
+
+
+def user_check_token(*, uidb64: int, token: str) -> BaseUser:
+    """función que permite chequear el token de la cadena enviada.
+
+    Parámetros:
+    uidb64 Código de id extraido
+    token Código de usuario enviado en la petición
+    """
+    user_id = force_str(urlsafe_base64_decode(uidb64))
+    user = user_by_id(id=user_id)
+
+    # Si el token no esta relacionado al usuario envia error.
+    if not PasswordResetTokenGenerator().check_token(user, token):
+        raise ValidationError('Invalid code.')
+
+    return user
+
+
+def user_make_token(*, email:int):
+    """Servicio que permite crear un token aleatorio con fecha
+    de caducidad detallado en las configuraciones a partir del
+    email del usuario.
+    """
+    separator = "_"
+    user = user_by_email(email=email)
+
+    uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+    token = PasswordResetTokenGenerator().make_token(user)
+
+    return "%s%s%s" % (token, separator,uidb64 )
+

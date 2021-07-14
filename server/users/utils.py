@@ -1,5 +1,6 @@
 import django.contrib.auth.password_validation as validators
 from django.core.exceptions import ValidationError
+ 
 
 
 def validate_password(*, password:str, user):
