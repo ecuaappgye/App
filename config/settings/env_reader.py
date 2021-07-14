@@ -1,3 +1,3 @@
 import environ
 
-env = environ.Environ()
+env = environ.Env()

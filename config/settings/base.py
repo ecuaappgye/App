@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 from .cors import * 
 from .sessions import *
+from .env_reader import env
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,7 +29,7 @@ SECRET_KEY = 'django-insecure-8zq79wpn50noa5#_=tram#w_ecnzt$%+$^&rzo5b2^4pr3nch0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -43,7 +44,8 @@ LOCAL_APPS = [
 ]
 
 DEPENDENCIES_APPS = [
-    "rest_framework"
+    "rest_framework",
+    "corsheaders",
 ]
 
 INSTALLED_APPS = [
@@ -65,6 +67,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Add middlewares corsheaders
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -94,17 +99,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ecua_app_gye',
+        'NAME': env('DATABASE_NAME', default=''),
         'USER': 'postgres',
-        'PASSWORD': '12345',
+        'PASSWORD': env('DATABASE_PASSWORD', default=''),
         'HOST': 'localhost',
         'PORT': '5432',
         'ATOMIC_REQUESTS': True
     }
 }
 
+# Middlware corsheaders
+CORS_ORIGIN_ALLOW_ALL = True
 
-# Custom use
+# Custom user
 AUTH_USER_MODEL = "users.BaseUser"
 
 
@@ -144,6 +151,21 @@ USE_TZ = True
 MEDIA_ROOT = os.path.join(os.getcwd(), 'media')
 
 
+# Email config
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_USE_TLS = True
+
+EMAIL_HOST = 'smtp.gmail.com'
+
+EMAIL_PORT = 587
+
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -165,3 +187,4 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'server.api.errors.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': []
 }
+
