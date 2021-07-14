@@ -14,7 +14,6 @@ def user_create(*,
     last_name:str, 
     email:str, 
     password:str,
-    id_rol:str,
     avatar
     )->BaseUser:
     
@@ -25,11 +24,7 @@ def user_create(*,
         password=password,
         avatar=avatar
     )
-
-    # Add role user
-    user.rol_id = id_rol
-    user.save()
-
+    
     return user
 
 
