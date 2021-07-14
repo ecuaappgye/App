@@ -1,9 +1,9 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ValidationError
-from django.db.models.query import ValuesIterable
 from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from server.users.selectors import user_by_email, user_by_id
+from config.settings.env_reader import env
 
 from .models import BaseUser
 from .utils import validate_password
@@ -75,13 +75,13 @@ def user_password_reset(*, email:str)->BaseUser:
     de que el correo no sea válido se enviara un error.
 
     Parámetros:
-    email -> Correo electrónico del usuario
+    email -> Correo electrónico del usuario.
     """
     token = user_make_token(email=email)
-    print(token)
     # Envio de notificación mediante servicio de mensajeria o correo.
-    #....pendiente
-    
+    user = user_by_email(email=email)
+    user.user_send_mail( "Reset Password.", token, env("EMAIL_HOST_USER", default=""))
+
     return token
 
 

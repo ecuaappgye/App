@@ -14,7 +14,6 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
         email = serializers.EmailField()
         avatar = serializers.ImageField(default=None)
         password = serializers.CharField()
-        id_rol = serializers.IntegerField(default=None)
 
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)

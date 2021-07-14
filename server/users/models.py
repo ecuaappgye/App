@@ -23,10 +23,10 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Email atribute used to validate session
+    # Atributo de inicio de sesión.
     USERNAME_FIELD = "email"
 
-    # Fields required by createsuperuser
+    # Atributo de creación de superadministrador.
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
     # Reference to managers object
@@ -74,10 +74,6 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     
     def user_send_mail(self, subject, message, from_email, **kwargs):
         send_mail(subject, message, from_email, [self.email], **kwargs)
-
-
-        
-
 
 
 class Rol(models.Model):
