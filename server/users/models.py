@@ -3,6 +3,7 @@ from django.db import models
 from .managers import BaseUserManager
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.mail import send_mail
 
 
 class BaseUser(AbstractBaseUser, PermissionsMixin):
@@ -70,6 +71,10 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     def is_staff(self):
         return self.is_admin
+    
+    def user_send_mail(self, subject, message, from_email, **kwargs):
+        send_mail(subject, message, from_email, [self.email], **kwargs)
+
 
         
 
