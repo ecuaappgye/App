@@ -34,6 +34,14 @@ def user_create(*,
 
 
 def user_update_profile(*, user_id:int, data)->BaseUser:
+    """Servicio que permite actualizar los datos de perfil del usuario.
+    Los campos declarados en el array de 'valid_fields' son únicamente
+    permitidos por no ser considerados sensibles.
+
+    Parámetros:
+    user_id -> Identificación del usuario
+    data -> Información de actualización
+    """
     user = user_by_id(id=user_id)
 
     valid_fields =[
@@ -43,8 +51,20 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
         "avatar"
     ]
 
+    update_fields = []
+
+    # Chequear si se ha enviado una imagen en la data.
+    # Procesar la imagen
+    avatar = data.get("avatar") 
+    if avatar:
+        pass
+
     for field in valid_fields:
-        print(field)
+        if field in data:
+            setattr(user, field, data[field])
+            update_fields.append(field)
+
+    user.save(update_fields=update_fields)
 
     return user
 
@@ -113,6 +133,12 @@ def user_password_change(*, user_id:int, old_password:str, new_password:str, pas
 
 
 def user_email_change(*, user_id, email):
+    """Servicio que permite cambiar de cuenta de correo electrónico.
+    
+    Parámetros:
+    user_id -> Identificación del usuario
+    email -> Nuevo correo electrónico
+    """
     user = user_by_id(id=user_id)
     user.email = email
     user.save(update_fields=["email"])

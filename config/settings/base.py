@@ -140,18 +140,28 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Saving storage
+MEDIA_ROOT = os.path.join(os.getcwd(), 'media')
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-SITE_URL = 'http://localhost:3000/'
 
+
+SITE_URL = 'http://localhost:3000/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Rest framework and settings
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'server.api.errors.custom_exception_handler',
+    'DEFAULT_AUTHENTICATION_CLASSES': []
+}

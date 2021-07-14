@@ -58,8 +58,9 @@ class UserUpdateProfile(ApiErrorsMixin, ApiAuthMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         first_name = serializers.CharField(required=False)
         last_name = serializers.CharField(required=False)
-        email = serializers.EmailField(required=False)
+        address = serializers.CharField(required=False)
         password = serializers.CharField(required=False)
+        avatar = serializers.ImageField(required=False)
 
     def post(self, request, user_id):
         serializer = self.OutputSerializer(data=request.data)
