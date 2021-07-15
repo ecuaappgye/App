@@ -6,7 +6,7 @@ from server.users.selectors import user_by_email, user_by_id
 from config.settings.env_reader import env
 
 from .models import BaseUser
-from .utils import validate_password
+from .utils import send_email_password_reset_for_user, validate_password
 
 
 def user_create(*,
@@ -73,9 +73,11 @@ def user_password_reset(*, email:str)->BaseUser:
     email -> Correo electrónico del usuario.
     """
     token = user_make_token(email=email)
-    # Envio de notificación mediante servicio de mensajeria o correo.
     user = user_by_email(email=email)
-    user.user_send_mail( "Reset Password.", token, env("EMAIL_HOST_USER", default=""))
+    # Envio de correo electrónico utilizando el usuario.
+    # Envío de token en el contexto del parámetro
+    extra_context = {"token": token}
+    send_email_password_reset_for_user(user=user)
 
     return token
 

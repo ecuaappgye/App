@@ -41,7 +41,6 @@ LOCAL_APPS = [
     "server.users.apps.BaseUserConfig",
     "server.authentication.apps.AuthenticationConfig",
     "server.communication.apps.CommunicationConfig"
-
 ]
 
 DEPENDENCIES_APPS = [
@@ -50,6 +49,7 @@ DEPENDENCIES_APPS = [
 ]
 
 INSTALLED_APPS = [
+    "django.contrib.sites",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -114,6 +114,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Custom user
 AUTH_USER_MODEL = "users.BaseUser"
+
+# Site ID
+SITE_ID = 1
 
 
 # Password validation
