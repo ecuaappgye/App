@@ -26,14 +26,27 @@ class CommunicationEventType(models.Model):
     
     USER_RELATED = "User related"
     DRIVER_RELATED = "Driver related"
+    SUPERVISOR_RELATED = "Supervisor related"
     CATEGORY_CHOICES = (
         (USER_RELATED, "USER_RELATED"),
-        (DRIVER_RELATED, "DRIVER_RELATED")
+        (DRIVER_RELATED, "DRIVER_RELATED"),
+        (SUPERVISOR_RELATED, "SUPERVISOR_RELATED")
     ) 
     category = models.CharField(choices=CATEGORY_CHOICES, max_length=50)
 
+    email_subject_template = models.CharField(
+        _('Email Subject Template'), max_length=255, blank=True, null=True)
+    email_body_template = models.TextField(
+        _('Email Body Template'), blank=True, null=True)
+    email_body_html_template = models.TextField(
+        _('Email Body HTML Template'), blank=True, null=True,
+        help_text=_("HTML template"))
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 
 
