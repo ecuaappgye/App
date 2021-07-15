@@ -41,9 +41,6 @@ class CommunicationDispatcher(object):
         if messages['subject'] and (messages['body'] or messages['html']):
             dispatched_messages['email'] = self.send_user_email_messages(
                 user, messages, attachments)
-        if messages['sms']:
-            dispatched_messages['sms'] = self.send_text_message(
-                user, messages['sms'])
         return dispatched_messages
         
     # Internal

@@ -18,7 +18,6 @@ def communication_event_type_get_messages(*, event: CommunicationEventType, code
         'subject': 'email_subject_template',
         'body': 'email_body_template',
         'html': 'email_body_html_template',
-        'sms': 'sms_template'
     }
 
     code = code.lower()

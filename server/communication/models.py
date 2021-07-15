@@ -6,9 +6,9 @@ class Email(models.Model):
     user = models.ForeignKey("users.BaseUser",
                             on_delete=models.CASCADE,
                             related_name="emails")
-    subject = models.CharField(max_length=50)
-    body_html = models.CharField(max_length=250)
-    body_text = models.CharField(max_length=250)
+    subject = models.TextField(null=True, blank=True)
+    body_html = models.TextField(null=True, blank=True)
+    body_text = models.TextField(null=True, blank=True)
     date_sent = models.DateTimeField(auto_now=timezone.now)
 
     class Meta:
@@ -22,7 +22,7 @@ class Email(models.Model):
 
 
 class CommunicationEventType(models.Model):
-    name = models.CharField(max_length=20)
+    code = models.CharField(max_length=20)
     
     USER_RELATED = "User related"
     DRIVER_RELATED = "Driver related"
@@ -44,6 +44,10 @@ class CommunicationEventType(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    email_subject_template_file = 'communication/emails/commtype_%s_subject.txt'
+    email_body_template_file = 'communication/emails/commtype_%s_body.txt'
+    email_body_html_template_file = 'communication/emails/commtype_%s_body.html'
 
     def __str__(self):
         return self.name

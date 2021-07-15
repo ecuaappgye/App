@@ -77,7 +77,7 @@ def user_password_reset(*, email:str)->BaseUser:
     # Envio de correo electrónico utilizando el usuario.
     # Envío de token en el contexto del parámetro
     extra_context = {"token": token}
-    send_email_password_reset_for_user(user=user)
+    send_email_password_reset_for_user(user=user, extra_context=extra_context)
 
     return token
 

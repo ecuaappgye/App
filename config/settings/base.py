@@ -78,7 +78,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join("templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -117,6 +117,9 @@ AUTH_USER_MODEL = "users.BaseUser"
 
 # Site ID
 SITE_ID = 1
+
+# Registro de emails
+SAVE_SENT_EMAILS_TO_DB = True
 
 
 # Password validation
@@ -191,4 +194,3 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'server.api.errors.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': []
 }
-
