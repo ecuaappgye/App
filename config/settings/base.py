@@ -40,7 +40,8 @@ LOCAL_APPS = [
     "server.api.apps.ApiConfig",
     "server.users.apps.BaseUserConfig",
     "server.authentication.apps.AuthenticationConfig",
-    "server.communication.apps.CommunicationConfig"
+    "server.communication.apps.CommunicationConfig",
+    "server.payments.apps.Paymentsconfig"
 ]
 
 DEPENDENCIES_APPS = [
