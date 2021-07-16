@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import BaseUser, Rol, Document
+from django.contrib.sessions.models import Session
 
 class BaseUserAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
@@ -8,6 +9,8 @@ class BaseUserAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
 
 admin.site.register(BaseUser, BaseUserAdmin)
+admin.site.register(Session)
+
 
 class RolAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'

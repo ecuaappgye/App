@@ -10,6 +10,7 @@ psycopg2 = "*"
 pillow = "*"
 django-environ = "*"
 django-cors-headers = "*"
+six = "*"
 
 [dev-packages]
 

@@ -1,8 +1,10 @@
+from django.contrib.sessions.models import Session
 from rest_framework.views import APIView
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from server.users.services import user_create, user_email_change, user_password_change, user_password_reset, user_password_reset_check, user_update_profile, user_password_reset
 from server.users.selectors import user_data
+from datetime import datetime 
 from server.api.mixins import ApiErrorsMixin, ApiAuthMixin
 from django.contrib.auth import authenticate, login, logout
 
@@ -32,8 +34,17 @@ class UserLoginApi(APIView):
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        
         user = authenticate(request, **serializer.validated_data)
+
+        # sessions = Session.objects.filter(expire_date__gte=datetime.now())
+        # if sessions:
+        #     for session in sessions:
+        #         session_data = session.get_decode()
+        #         print(session_data)
+                # if user.id == int(session_data.get(("_auth_user_id"))):
+                #     session.d
+
         if user is None:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
