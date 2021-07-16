@@ -1,12 +1,14 @@
+import threading
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from server.users.selectors import user_by_email, user_by_id
 from config.settings.env_reader import env
+from threading import Thread
 
 from .models import BaseUser
-from .utils import send_email_password_reset_for_user, validate_password
+from .utils import send_email_email_change, send_email_password_change, send_email_password_reset_check_for_user, send_email_password_reset_for_user, validate_password
 
 
 def user_create(*,
@@ -77,7 +79,11 @@ def user_password_reset(*, email:str)->BaseUser:
     # Envio de correo electrónico utilizando el usuario.
     # Envío de token en el contexto del parámetro
     extra_context = {"token": token}
-    send_email_password_reset_for_user(user=user, extra_context=extra_context)
+    # Preparar un nuevo proceso en el sistema operativo.
+    # Envío de email con coste computacional pesado.
+    thread = Thread(target=send_email_password_reset_for_user, 
+         args=(user, extra_context))
+    thread.start()
 
     return token
 
@@ -109,6 +115,12 @@ def user_password_reset_check(*, token:str, new_password:str, password_confirm:s
     user.set_password(new_password)
     user.save(update_fields=["password"])
 
+    # Envío de notificaciones utilizando un nuevo proceso
+    # del sisteama operativo.
+    thread = threading.Thread(target=send_email_password_reset_check_for_user,
+        args=(user, None))
+    thread.start()
+
     return user
 
 
@@ -126,6 +138,11 @@ def user_password_change(*, user_id:int, old_password:str, new_password:str, pas
     user.set_password(new_password)
     user.save(update_fields=["password"])
 
+    # Envío de notificación en un nuevo proceso.
+    thread = threading.Thread(target=send_email_password_change,
+        args=(user, None))
+    thread.start()
+
     return user
 
 
@@ -139,6 +156,11 @@ def user_email_change(*, user_id, email):
     user = user_by_id(id=user_id)
     user.email = email
     user.save(update_fields=["email"])
+
+    # Notificar en un nuevo proceso del sistema operativo
+    thread = Thread(target=send_email_email_change,
+        args=(user, None))
+    thread.start()
 
     return user
 

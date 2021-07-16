@@ -1,0 +1,13 @@
+{% load i18n %}
+
+{% block body %}
+
+    {% blocktrans %}
+            Email cambiado.
+    {% endblocktrans %}
+
+    {% trans "Copia el token:" %}
+    {% blocktrans %}
+            {{ token }}
+    {% endblocktrans %}
+{% endblock %}

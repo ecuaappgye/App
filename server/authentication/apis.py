@@ -98,7 +98,7 @@ class UserPasswordResetCheck(ApiErrorsMixin, APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class UserPasswordChange(ApiErrorsMixin, APIView):
+class UserPasswordChange(ApiErrorsMixin, ApiAuthMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         old_password = serializers.CharField()
         new_password = serializers.CharField()
