@@ -9,7 +9,14 @@ class BaseUserAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
 
 admin.site.register(BaseUser, BaseUserAdmin)
-admin.site.register(Session)
+
+class SessionAdmin(admin.ModelAdmin):
+    def user_session(self, object):
+        session_decode = object.get_decoded()
+        user_id = session_decode.get('_auth_user_id')
+        return BaseUser.objects.get(id=user_id)
+    list_display = ('user_session', 'expire_date' )
+admin.site.register(Session, SessionAdmin)
 
 
 class RolAdmin(admin.ModelAdmin):

@@ -242,12 +242,12 @@ def user_unique_session(*, user):
         return None
 
     for session in sessions:
-        session_data = session.get_decoded()
-        # if not session_data.get("_auth_user_id"):
-        #     return None
-        # if user.id == int(session_data.get("_auth_user_id")):
-        #     session.delete()
-        #     raise ValidationError("Credenciales no autorizadas.")
-        print(session_data.get("_auth_user_id"))
+        session_decode = session.get_decoded()
+        if '_auth_user_id' in session_decode:
+            if user.id == int(session_decode.get('_auth_user_id')):
+                session.delete()
+                return True
+
+                
                     
         

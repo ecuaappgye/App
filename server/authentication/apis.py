@@ -44,7 +44,11 @@ class UserLoginApi(APIView):
 
         # Eliminar sesión si ya existe el usuario.
         # Borrar la sesión de la base de datos.
-        user_unique_session(user=user)
+        #Denegar el acceso al usuario
+        session = user_unique_session(user=user)
+        if session is not None:
+            return Response({"message":"Sesión ya utilizada."},
+                            status=status.HTTP_409_CONFLICT)
 
         login(request, user)
         data = user_data(user=user)
