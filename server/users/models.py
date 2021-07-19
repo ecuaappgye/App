@@ -15,7 +15,7 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     # Check if admin of active to session
     is_admin = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
 
     rol = models.ForeignKey("users.Rol", null=True, blank=True, on_delete=models.CASCADE)
     document = models.ForeignKey("users.Document", null=True, blank=True, on_delete=models.CASCADE)
@@ -72,8 +72,6 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     def is_staff(self):
         return self.is_admin
     
-    def user_send_mail(self, subject, message, from_email, **kwargs):
-        send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
 class Rol(models.Model):

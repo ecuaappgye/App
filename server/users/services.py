@@ -1,9 +1,10 @@
+from datetime import datetime
 from threading import Thread
-from datetime import datetime 
-from django.contrib.sessions.models import Session
 
+import six
 from config.settings.env_reader import env
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -12,7 +13,8 @@ from server.users.selectors import user_by_email, user_by_id
 from .models import BaseUser
 from .utils import (send_email_email_change, send_email_password_change,
                     send_email_password_reset_check_for_user,
-                    send_email_password_reset_for_user, validate_password)
+                    send_email_password_reset_for_user,
+                    validate_password, send_sms_for_user)
 
 
 def user_create(*,
@@ -32,6 +34,29 @@ def user_create(*,
     )
     
     return user
+
+
+def user_create_verify(*, phone):
+    if not phone:
+        raise ValidationError("Número telefónico requerido.")
+    
+    print(phone)
+    
+    #message = send_sms_for_user(phone=phone, content='')
+
+    return 'message'
+
+    
+
+
+def user_create_verify_check(*, code):
+    user_id = 1
+    user = BaseUser.objects.get(id=user_id)
+    user.is_active = True
+    user.save(update_fields=['is_active'])
+
+    return user
+
 
 
 def user_update_profile(*, user_id:int, data)->BaseUser:

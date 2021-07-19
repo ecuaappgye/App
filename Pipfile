@@ -11,6 +11,7 @@ pillow = "*"
 django-environ = "*"
 django-cors-headers = "*"
 six = "*"
+twilio = "*"
 
 [dev-packages]
 

@@ -176,6 +176,13 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 
+# Send mail config
+
+SMS_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
+
+SMS_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
+
+SMS_TWILIO_NUMBER = env('TWILIO_NUMBER', default='')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/

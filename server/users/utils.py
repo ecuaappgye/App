@@ -1,6 +1,8 @@
 import django.contrib.auth.password_validation as validators
 from django.core.exceptions import ValidationError
 from server.communication.managers import CommunicationDispatcher
+from twilio.rest import Client
+from django.conf import settings
  
 
 PASSWORD_RESET_EVENT_CODE = "PASSWORD_RESET"
@@ -26,7 +28,18 @@ def send_email_email_change(user, extra_context):
     messages = CommunicationDispatcher().get_messages(EMAIL_CHANGE_EVENT_CODE,
             extra_context)
     CommunicationDispatcher().dispatch_user_messages(user, messages)
+
+def send_sms_for_user(*, phone:str, content:str):
+    client = Client(settings.SMS_ACCOUNT_SID, settings.SMS_AUTH_TOKEN)
+    message = client.messages.create(
+        to=phone,
+        from_= settings.SMS_TWILIO_NUMBER,
+        body = content 
+    )
     
+    return message
+    
+
 def validate_password(*, password:str, user):
     errors = dict()
     try:

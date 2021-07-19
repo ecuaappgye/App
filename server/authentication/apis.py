@@ -7,7 +7,9 @@ from server.users.selectors import user_data
 from server.users.services import (user_create, user_email_change,
                                    user_password_change, user_password_reset,
                                    user_password_reset_check,
-                                   user_update_profile, user_unique_session)
+                                   user_create_verify,
+                                   user_create_verify_check,
+                                   user_unique_session, user_update_profile)
 
 
 class UserRegisterApi(ApiErrorsMixin, APIView):
@@ -26,6 +28,31 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
 
         return Response(status=status.HTTP_201_CREATED)
 
+class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        phone = serializers.CharField()
+    
+    def post(self, request):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user_create_verify(**serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class UserRegisterVerifyCheckApi(ApiErrorsMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        code = serializers.CharField()
+    
+    def post(self, request):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_create_verify_check(**serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)
+
 
 class UserLoginApi(APIView):
     class OutputSerializer(serializers.Serializer):
@@ -35,9 +62,9 @@ class UserLoginApi(APIView):
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        user = authenticate(request, **serializer.validated_data)
 
+        user = authenticate(request, **serializer.validated_data)
+        
         if user is None:
             return Response({"message":"Credenciales no válidas."},
                             status=status.HTTP_401_UNAUTHORIZED)
