@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BaseUser, Rol, DocumentType
+from .models import BaseUser, DocumentTypeRol, Rol, DocumentType, UserDocumentTypeRol
 from django.contrib.sessions.models import Session
 
 class BaseUserAdmin(admin.ModelAdmin):
@@ -27,3 +27,6 @@ class DocumentTypeAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     list_display = ("name", "description")
 admin.site.register(DocumentType, DocumentTypeAdmin)
+admin.site.register(DocumentTypeRol)
+admin.site.register(UserDocumentTypeRol)
+

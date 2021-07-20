@@ -6,13 +6,15 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BaseUser(AbstractBaseUser, PermissionsMixin):
-    first_name = models.CharField(max_length=20)
+    first_name = models.CharField(max_length=20, verbose_name='First name')
     last_name = models.CharField(max_length=20)
     address = models.CharField(max_length=100, null=True, blank=True)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, max_length=30)
     avatar = models.ImageField(upload_to="avatar", null=True, blank=True)
     phone = models.CharField(max_length=10, null=True, blank=True)
     cdi = models.CharField(max_length=10, null=True, blank=True)
+
+    document_type_rol_id = models.ManyToManyField('users.DocumentTypeRol', through='users.UserDocumentTypeRol')
 
     # Check if admin of active to session
     is_admin = models.BooleanField(default=False)
@@ -48,7 +50,6 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     def is_staff(self):
         return self.is_admin
-    
 
 
 class Rol(models.Model):
@@ -77,7 +78,7 @@ class DocumentType(models.Model):
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=100,
         help_text="Descripción del tipo de documento.")
-    rol = models.ManyToManyField(Rol)
+    rol = models.ManyToManyField(Rol, through='users.DocumentTypeRol')
     
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -89,3 +90,14 @@ class DocumentType(models.Model):
     
     def __str__(self) -> str:
         return self.name
+
+
+class DocumentTypeRol(models.Model):
+    document_id = models.ForeignKey(DocumentType, on_delete=models.CASCADE)
+    rol_id = models.ForeignKey(Rol, on_delete=models.CASCADE)
+
+
+class UserDocumentTypeRol(models.Model):
+    user_id = models.ForeignKey('users.BaseUser', on_delete=models.PROTECT)
+    document_type_rol_id = models.ForeignKey(DocumentTypeRol, on_delete=models.PROTECT)
+    url = models.TextField()
