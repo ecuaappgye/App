@@ -3,7 +3,6 @@ from django.db import models
 from .managers import BaseUserManager
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.core.mail import send_mail
 
 
 class BaseUser(AbstractBaseUser, PermissionsMixin):
@@ -12,13 +11,12 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     address = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(unique=True)
     avatar = models.ImageField(upload_to="avatar", null=True, blank=True)
+    phone = models.CharField(max_length=10, null=True, blank=True)
+    cdi = models.CharField(max_length=10, null=True, blank=True)
 
     # Check if admin of active to session
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
-
-    rol = models.ForeignKey("users.Rol", null=True, blank=True, on_delete=models.CASCADE)
-    document = models.ForeignKey("users.Document", null=True, blank=True, on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -31,9 +29,6 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     # Reference to managers object
     objects = BaseUserManager()
-
-    DRIVER = "conductor"
-    CLIENT = "cliente"
     
     class Meta:
         ordering = ['-created_at']
@@ -51,24 +46,6 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
         full_name = "%s %s" % (self.first_name.title(), self.last_name.title())
         return full_name.strip()
 
-    @property
-    def rol_name(self):
-        if not self.rol:
-            return None
-        return self.rol.name
-
-    @ property
-    def is_driver(self):
-        if not self.rol:
-            return None
-        return self.rol.name.lower() == self.DRIVER
-    
-    @ property
-    def is_client(self):
-        if not self.rol:
-            return None
-        return self.rol.name.lower() == self.CLIENT
-
     def is_staff(self):
         return self.is_admin
     
@@ -78,7 +55,8 @@ class Rol(models.Model):
     name = models.CharField(max_length=20)
     description = models.CharField(max_length=100,
         help_text="Descripción de tareas a realizar por el rol.")
-
+    
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -94,18 +72,20 @@ class Rol(models.Model):
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    
-class Document(models.Model):
-    cedula_img = models.ImageField(upload_to="cedula_img")
-    licencia_img = models.ImageField(upload_to="licencia_img")
-    matricula_img = models.ImageField(upload_to="matricula_img")
 
+class DocumentType(models.Model):
+    name = models.CharField(max_length=20)
+    description = models.CharField(max_length=100,
+        help_text="Descripción del tipo de documento.")
+    rol = models.ManyToManyField(Rol)
+    
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = _('Document')
-        verbose_name_plural = _('Documents')
-
-
+        verbose_name = _('Document Type')
+        verbose_name_plural = _('Document Types')
+    
+    def __str__(self) -> str:
+        return self.name

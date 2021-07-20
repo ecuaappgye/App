@@ -124,7 +124,8 @@ SAVE_SENT_EMAILS_TO_DB = True
 
 # Duración de dias del token generado de
 # reestablecimiento de contraseñas.
-PASSWORD_RESET_TIMEOUT_DAYS = 5
+# 1 días en segundos.
+PASSWORD_RESET_TIMEOUT  = 84.600
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

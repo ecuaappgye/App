@@ -12,6 +12,8 @@ django-environ = "*"
 django-cors-headers = "*"
 six = "*"
 twilio = "*"
+pytest-django = "*"
+faker = "*"
 
 [dev-packages]
 

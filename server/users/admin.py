@@ -1,13 +1,12 @@
 from django.contrib import admin
-from .models import BaseUser, Rol, Document
+from .models import BaseUser, Rol, DocumentType
 from django.contrib.sessions.models import Session
 
 class BaseUserAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
-    list_display = ("full_name", "email", "rol_name", "created_at")
+    list_display = ("full_name", "email", "created_at")
     search_fields = ("email",)
     list_filter = ['created_at']
-
 admin.site.register(BaseUser, BaseUserAdmin)
 
 class SessionAdmin(admin.ModelAdmin):
@@ -18,13 +17,13 @@ class SessionAdmin(admin.ModelAdmin):
     list_display = ('user_session', 'expire_date' )
 admin.site.register(Session, SessionAdmin)
 
-
 class RolAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     list_display = ("name", "created_at")
     search_fields = ("name",)
 admin.site.register(Rol, RolAdmin)
 
-class DocumentAdmin(admin.ModelAdmin):
+class DocumentTypeAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
-admin.site.register(Document, DocumentAdmin)
+    list_display = ("name", "description")
+admin.site.register(DocumentType, DocumentTypeAdmin)

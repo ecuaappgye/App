@@ -11,9 +11,9 @@ authentication_urls = [
     path("register/verify/", UserRegisterVerifyApi.as_view()),
     path("register/verify_check/", UserRegisterVerifyCheckApi.as_view()),
 
-    path("login/", UserLoginApi.as_view()),
+    path("login/", UserLoginApi.as_view(), name='login'),
 
-    path("logout/", UserLogoutApi.as_view()),
+    path("logout/", UserLogoutApi.as_view(), name='logout'),
 
     path("update_profile/<int:user_id>/", UserUpdateProfile.as_view()),
 
@@ -26,5 +26,5 @@ authentication_urls = [
 ]
 
 urlpatterns =[
-    path("auth/", include((authentication_urls)))
+    path("auth/", include((authentication_urls, 'auth')))
 ]
