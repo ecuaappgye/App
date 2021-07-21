@@ -3,7 +3,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
-from server.users.selectors import user_data, user_by_id_data, user_fields
+from server.users.selectors import user_data, user_by_id_data, user_model_fields
 from server.users.services import ( user_create,
                                    user_create_verify,
                                    user_create_verify_check, user_email_change,
@@ -27,6 +27,7 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
         user_create(**serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
+
 
 class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
@@ -173,7 +174,7 @@ class DriverGetApi(ApiErrorsMixin, ApiAuthMixin, APIView):
     def get(self, request, user_id):
 
         user = user_by_id_data(id=user_id)
-        fields = user_fields(user=user)
+        fields = user_model_fields(user_data=user)
 
         return Response({
             'fields': fields,

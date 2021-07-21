@@ -11,7 +11,7 @@ class BaseUserManager(BUM):
         email, 
         password,
         avatar,
-        is_active=False,
+        is_active=True,
         is_admin=False):
 
         if not email:
@@ -52,3 +52,8 @@ class BaseUserManager(BUM):
         user.save(using=self._db)
 
         return user
+
+    def create(self, **kwargs):
+        # Method allow invoque factory by default
+        # Factory invoque methods
+        return self.user_create(**kwargs)

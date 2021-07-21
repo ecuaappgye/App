@@ -6,13 +6,13 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BaseUser(AbstractBaseUser, PermissionsMixin):
-    first_name = models.CharField(max_length=20, verbose_name='First name')
-    last_name = models.CharField(max_length=20)
-    address = models.CharField(max_length=100, null=True, blank=True)
-    email = models.EmailField(unique=True, max_length=30)
-    avatar = models.ImageField(upload_to="avatar", null=True, blank=True)
-    phone = models.CharField(max_length=10, null=True, blank=True)
-    cdi = models.CharField(max_length=10, null=True, blank=True)
+    first_name = models.CharField(max_length=20, verbose_name='Nombres')
+    last_name = models.CharField(max_length=20, verbose_name='Apellidos')
+    address = models.CharField(max_length=100, null=True, blank=True, verbose_name='Dirección de domicilio')
+    email = models.EmailField(unique=True, max_length=40, verbose_name='Correo electrónico')
+    avatar = models.ImageField(upload_to="avatar", null=True, blank=True, verbose_name='Avatar')
+    phone = models.CharField(max_length=10, null=True, blank=True, verbose_name='Número telefónico')
+    cdi = models.CharField(max_length=10, null=True, blank=True, verbose_name='Cédula de identidad')
 
     document_type_rol_id = models.ManyToManyField('users.DocumentTypeRol', through='users.UserDocumentTypeRol')
 
