@@ -12,8 +12,7 @@ def user_data(*, user)->BaseUser:
         "address": user.address,
         "avatar": user.avatar.url if user.avatar else None,
         "cdi": user.cdi,
-        "phone": user.phone
-    }
+        "phone": user.phone}
 
     except Exception :
         raise ValidationError("Usuario no encontrado.")
@@ -51,7 +50,6 @@ def user_model_fields(*, user_data):
                'FileField':'file',
                'TextField':'textarea',
                'EmailField':'email'}
-    
 
     for field in BaseUser._meta.fields:
         if field.attname in valid_fields:
@@ -59,7 +57,9 @@ def user_model_fields(*, user_data):
                 'name': field.verbose_name,
                 'length': field.max_length,
                 'null': field.null,
-                'type': output.get(field.get_internal_type())
+                'type': output.get(field.get_internal_type()),
+                'value': user_data.get(field.attname),
+                'atribute': field.attname
             })
 
     return data

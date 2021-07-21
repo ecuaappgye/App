@@ -11,7 +11,7 @@ class BaseUserManager(BUM):
         email, 
         password,
         avatar,
-        is_active=True,
+        is_active=False,
         is_admin=False):
 
         if not email:

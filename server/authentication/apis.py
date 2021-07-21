@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.forms.fields import Field
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,6 +26,24 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
         serializer.is_valid(raise_exception=True)
         
         user_create(**serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class UserUpdateApi(ApiErrorsMixin, ApiAuthMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        first_name = serializers.CharField()
+        last_name = serializers.CharField()
+        address = serializers.CharField()
+        avatar = serializers.CharField()
+        phone = serializers.CharField()
+        cdi = serializers.CharField()
+
+    def post(self, request, user_id):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid()
+        
+        user_update_profile(user_id=user_id)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -71,8 +90,8 @@ class UserLoginApi(APIView):
                             status=status.HTTP_401_UNAUTHORIZED)
 
         # Eliminar sesión si ya existe el usuario.
-        # Borrar la sesión de la base de datos.
-        #Denegar el acceso al usuario
+        # Borrar la sesión del usuario actual de la base de datos.
+        # Denegar el acceso al usuario.
         session = user_unique_session(user=user)
         if session is not None:
             return Response({"message":"Sesión ya utilizada."},
@@ -92,24 +111,7 @@ class UserLogoutApi(ApiAuthMixin, APIView):
         logout(request)
 
         return Response(status=status.HTTP_201_CREATED)
-
-
-class UserUpdateProfile(ApiErrorsMixin, ApiAuthMixin, APIView):
-    class OutputSerializer(serializers.Serializer):
-        first_name = serializers.CharField(required=False)
-        last_name = serializers.CharField(required=False)
-        address = serializers.CharField(required=False)
-        password = serializers.CharField(required=False)
-        avatar = serializers.ImageField(required=False)
-
-    def post(self, request, user_id):
-        serializer = self.OutputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user_update_profile(user_id=user_id, data=serializer.validated_data)
-
-        return Response(status=status.HTTP_201_CREATED)
-
+        
 
 class UserPasswordReset(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
@@ -176,7 +178,7 @@ class DriverGetApi(ApiErrorsMixin, ApiAuthMixin, APIView):
         user = user_by_id_data(id=user_id)
         fields = user_model_fields(user_data=user)
 
-        return Response({
-            'fields': fields,
-            'user':user,
-        })
+        return Response({'fields': fields})
+
+
+

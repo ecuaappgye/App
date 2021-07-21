@@ -46,19 +46,6 @@ def user_create_verify(*, phone):
 
     return 'message'
 
-    
-
-
-def user_create_verify_check(*, code):
-    user_id = 1
-    user = BaseUser.objects.get(id=user_id)
-    user.is_active = True
-    user.save(update_fields=['is_active'])
-
-    return user
-
-
-
 def user_update_profile(*, user_id:int, data)->BaseUser:
     """Servicio que permite actualizar los datos de perfil del usuario.
     Los campos declarados en el array de 'valid_fields' son únicamente
@@ -71,10 +58,12 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
     user = user_by_id(id=user_id)
 
     valid_fields =[
-        "first_name",
-        "last_name",
-        "address",
-        "avatar"
+        'first_name',
+        'last_name',
+        'address',
+        'avatar',
+        'cdi',
+        'phone'
     ]
 
     update_fields = []
@@ -91,6 +80,15 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
             update_fields.append(field)
 
     user.save(update_fields=update_fields)
+
+    return user
+
+
+def user_create_verify_check(*, code):
+    user_id = 1
+    user = BaseUser.objects.get(id=user_id)
+    user.is_active = True
+    user.save(update_fields=['is_active'])
 
     return user
 
