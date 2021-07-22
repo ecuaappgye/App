@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.forms.fields import Field
 from rest_framework import serializers, status
+from rest_framework.fields import empty
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
@@ -31,19 +32,19 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
 
 
 class UserUpdateApi(ApiErrorsMixin, ApiAuthMixin, APIView):
-    class OutputSerializer(serializers.Serializer):
+    class Inputerializer(serializers.Serializer):
         first_name = serializers.CharField()
         last_name = serializers.CharField()
         address = serializers.CharField()
-        avatar = serializers.CharField()
+        avatar = serializers.ImageField(default=None)
         phone = serializers.CharField()
         cdi = serializers.CharField()
 
     def post(self, request, user_id):
-        serializer = self.OutputSerializer(data=request.data)
-        serializer.is_valid()
+        serializer = self.Inputerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
-        user_update_profile(user_id=user_id)
+        user_update_profile(user_id=user_id, data=serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
 

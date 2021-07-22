@@ -13,8 +13,8 @@ from server.users.selectors import user_by_email, user_by_id
 from .models import BaseUser
 from .utils import (send_email_email_change, send_email_password_change,
                     send_email_password_reset_check_for_user,
-                    send_email_password_reset_for_user,
-                    validate_password, send_sms_for_user)
+                    send_email_password_reset_for_user, send_sms_for_user,
+                    validate_password)
 
 
 def user_create(*,
@@ -73,7 +73,7 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
     avatar = data.get("avatar") 
     if avatar:
         pass
-
+    
     for field in valid_fields:
         if field in data:
             setattr(user, field, data[field])

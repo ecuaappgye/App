@@ -1,10 +1,10 @@
 from django.urls import include, path
 
-from .apis import ( DriverGetApi, UserEmailChange, UserLoginApi, UserLogoutApi,
+from .apis import (DriverGetApi, UserEmailChange, UserLoginApi, UserLogoutApi,
                    UserPasswordChange, UserPasswordReset,
                    UserPasswordResetCheck, UserRegisterApi,
-                   UserUpdateApi,
-                   UserRegisterVerifyApi, UserRegisterVerifyCheckApi)
+                   UserRegisterVerifyApi, UserRegisterVerifyCheckApi,
+                   UserUpdateApi)
 
 authentication_urls = [
     path('register/', UserRegisterApi.as_view()),
@@ -23,7 +23,7 @@ authentication_urls = [
 
 drivers_urls =[
     path('get/<int:user_id>/', DriverGetApi.as_view(), name='get'),
-    path('update/int:user_id/', UserUpdateApi.as_view(), name='update')
+    path('update/<int:user_id>/', UserUpdateApi.as_view(), name='update')
 ]
 
 urlpatterns =[
