@@ -57,6 +57,9 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
     """
     user = user_by_id(id=user_id)
 
+    if not data:
+        raise ValidationError("Campos requeridos.")
+
     valid_fields =[
         'first_name',
         'last_name',
@@ -67,7 +70,6 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
     ]
 
     update_fields = []
-
     # Chequear si se ha enviado una imagen en la data.
     # Procesar la imagen
     avatar = data.get("avatar") 
@@ -79,6 +81,9 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
             setattr(user, field, data[field])
             update_fields.append(field)
 
+    if not update_fields:
+        return None
+        
     user.save(update_fields=update_fields)
 
     return user
@@ -187,6 +192,21 @@ def user_email_change(*, user_id, email):
 
     return user
 
+# =============
+# Sessions
+# =============
+
+def user_unique_session(*, user):
+    sessions = Session.objects.filter(expire_date__gte=datetime.now())
+    if not sessions:
+        return None
+
+    for session in sessions:
+        session_decode = session.get_decoded()
+        if '_auth_user_id' in session_decode:
+            if user.id == int(session_decode.get('_auth_user_id')):
+                session.delete()
+                return True
 
 # =================
 # Services methods
@@ -255,21 +275,6 @@ def user_make_token(*, email:int):
     return "%s%s%s" % (token, separator, uidb64 )
 
         
-# =============
-# Sessions
-# =============
-
-def user_unique_session(*, user):
-    sessions = Session.objects.filter(expire_date__gte=datetime.now())
-    if not sessions:
-        return None
-
-    for session in sessions:
-        session_decode = session.get_decoded()
-        if '_auth_user_id' in session_decode:
-            if user.id == int(session_decode.get('_auth_user_id')):
-                session.delete()
-                return True
 
                 
                     
