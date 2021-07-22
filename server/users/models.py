@@ -3,6 +3,7 @@ from django.db import models
 from .managers import BaseUserManager
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from .utils import user_directory_path
 
 
 class BaseUser(AbstractBaseUser, PermissionsMixin):
@@ -10,7 +11,7 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=20, verbose_name='Apellidos')
     address = models.CharField(max_length=100, null=True, blank=True, verbose_name='Dirección de domicilio')
     email = models.EmailField(unique=True, max_length=40, verbose_name='Correo electrónico')
-    avatar = models.ImageField(upload_to="avatar", null=True, blank=True, verbose_name='Avatar')
+    avatar = models.ImageField(upload_to=user_directory_path, null=True, blank=True, verbose_name='Avatar')
     phone = models.CharField(max_length=10, null=True, blank=True, verbose_name='Número telefónico')
     cdi = models.CharField(max_length=10, null=True, blank=True, verbose_name='Cédula de identidad')
 

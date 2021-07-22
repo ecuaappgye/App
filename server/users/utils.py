@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from server.communication.managers import CommunicationDispatcher
 from twilio.rest import Client
 from django.conf import settings
+from datetime import datetime
  
 
 PASSWORD_RESET_EVENT_CODE = "PASSWORD_RESET"
@@ -51,5 +52,8 @@ def validate_password(*, password:str, user):
         raise ValidationError(errors)
 
 
+def user_directory_path(instance, filename):
+    now = datetime.now()
+    format = now.strftime('%Y-%m-%d %H:%M:%S')
 
-
+    return f'avatar/{format}-{filename}'
