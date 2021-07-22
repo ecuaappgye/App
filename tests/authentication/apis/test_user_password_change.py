@@ -48,9 +48,9 @@ class TestUserPasswordChangeApi(TestCase):
             'new_password': new_password,
             'password_confirm':new_password
         }
-        user_id = BaseUser.objects.first().id
-        self.client.post(reverse('api:auth:password_change',
-            kwargs={'user_id': user_id }), data)
+        # user_id = BaseUser.objects.first().id
+        # self.client.post(reverse('api:auth:password_change',
+        #     kwargs={'user_id': user_id }), data)
         # self.assertEqual(201, response.status_code)
 
         

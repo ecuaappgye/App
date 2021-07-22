@@ -20,7 +20,7 @@ class BaseUserManager(BUM):
         user = self.model(
             first_name=first_name,
             last_name= last_name,
-            email=self.normalize_email(email),
+            email=self.normalize_email(email.lower()),
             is_admin=is_admin,
             is_active=is_active,
             avatar=avatar)

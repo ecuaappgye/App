@@ -182,8 +182,8 @@ def user_email_change(*, user_id, email):
     user.save(update_fields=["email"])
 
     # Notificar en un nuevo proceso del sistema operativo
-    Thread(target=send_email_email_change,
-        args=(user, None)).start()
+    # Thread(target=send_email_email_change,
+    #     args=(user, None)).start()
 
     return user
 
