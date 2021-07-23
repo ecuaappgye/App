@@ -36,7 +36,7 @@ class UserUpdateApi(ApiErrorsMixin, ApiAuthMixin, APIView):
         first_name = serializers.CharField()
         last_name = serializers.CharField()
         address = serializers.CharField()
-        avatar = serializers.ImageField(default=None)
+        avatar = serializers.ImageField(default=None, required=False)
         phone = serializers.CharField()
         cdi = serializers.CharField()
 

@@ -54,6 +54,6 @@ def validate_password(*, password:str, user):
 
 def user_directory_path(instance, filename):
     now = datetime.now()
-    format = now.strftime('%Y-%m-%d %H:%M:%S')
+    format = now.strftime('%Y-%m-%d')
 
     return f'avatar/{format}-{filename}'
