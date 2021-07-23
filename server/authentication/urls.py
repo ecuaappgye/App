@@ -1,12 +1,14 @@
 from django.urls import include, path
 
-from .apis import (DriverGetApi, UserEmailChange, UserLoginApi, UserLogoutApi,
+from .apis import (UserEmailChange, UserGetApi, UserLoginApi, UserLogoutApi,
                    UserPasswordChange, UserPasswordReset,
                    UserPasswordResetCheck, UserRegisterApi,
                    UserRegisterVerifyApi, UserRegisterVerifyCheckApi,
                    UserUpdateApi)
 
 authentication_urls = [
+    path('get/<int:user_id>/', UserGetApi.as_view(), name='get'),
+
     path('register/', UserRegisterApi.as_view()),
     path('register/verify/', UserRegisterVerifyApi.as_view()),
     path('register/verify_check/', UserRegisterVerifyCheckApi.as_view()),
@@ -22,7 +24,6 @@ authentication_urls = [
 ]
 
 drivers_urls =[
-    path('get/<int:user_id>/', DriverGetApi.as_view(), name='get'),
     path('update/<int:user_id>/', UserUpdateApi.as_view(), name='update')
 ]
 

@@ -18,7 +18,6 @@ def user_data(*, user)->BaseUser:
         raise ValidationError("Usuario no encontrado.")
     
 
-
 def user_by_id(*, id:int)->BaseUser:
     try:
         return BaseUser.objects.get(id=id)
@@ -35,31 +34,3 @@ def user_by_id_data(*, id:int):
     user = user_by_id(id=id)
     
     return user_data(user=user)
-
-
-def user_model_fields(*, user_data):
-    # Actulizar el array de envío de data 
-    # Si cambian atributos de creación de conductor.
-    if not user_data:
-        raise ValidationError('Usuario no contiene atributos.')
-
-    data = []
-    valid_fields = [e for e in user_data]
-    
-    output = { 'CharField':'text',
-               'FileField':'file',
-               'TextField':'textarea',
-               'EmailField':'email'}
-
-    for field in BaseUser._meta.fields:
-        if field.attname in valid_fields:
-            data.append({
-                'name': field.verbose_name,
-                'length': field.max_length,
-                'null': field.null,
-                'type': output.get(field.get_internal_type()),
-                'value': user_data.get(field.attname),
-                'atribute': field.attname
-            })
-
-    return data

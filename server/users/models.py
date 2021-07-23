@@ -97,6 +97,8 @@ class DocumentTypeRol(models.Model):
     document_id = models.ForeignKey(DocumentType, on_delete=models.CASCADE)
     rol_id = models.ForeignKey(Rol, on_delete=models.CASCADE)
 
+    
+
 
 class UserDocumentTypeRol(models.Model):
     user_id = models.ForeignKey('users.BaseUser', on_delete=models.PROTECT)

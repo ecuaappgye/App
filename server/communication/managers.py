@@ -138,7 +138,10 @@ class CommunicationDispatcher(object):
         """
         Return context that is common to all emails
         """
-        return {'site': Site.objects.get_current()}
+        try:
+            return {'site': Site.objects.get_current()}
+        except Site.DoesNotExist:
+            return {'site': None}
 
     def get_messages(self, event_code, extra_context=None):
         """

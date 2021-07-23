@@ -1,17 +1,33 @@
 from django.contrib.auth import authenticate, login, logout
-from django.forms.fields import Field
 from rest_framework import serializers, status
-from rest_framework.fields import empty
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
-from server.users.selectors import user_data, user_by_id_data, user_model_fields
-from server.users.services import ( user_create,
-                                   user_create_verify,
+from server.users.selectors import user_by_id, user_data
+from server.users.services import (user_create, user_create_verify,
                                    user_create_verify_check, user_email_change,
                                    user_password_change, user_password_reset,
                                    user_password_reset_check,
                                    user_unique_session, user_update_profile)
+
+
+class UserGetApi(ApiErrorsMixin, ApiAuthMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        first_name = serializers.CharField()
+        last_name = serializers.CharField()
+        email = serializers.EmailField()
+        avatar = serializers.ImageField(default=None)
+        cdi = serializers.CharField()
+        phone = serializers.CharField()
+        address = serializers.CharField()
+
+    def get(self, request, user_id):
+
+        user = user_by_id(id=user_id)
+        data = self.OutputSerializer(user).data
+
+        return Response(data)
 
 
 class UserRegisterApi(ApiErrorsMixin, APIView):
@@ -170,16 +186,6 @@ class UserEmailChange(ApiErrorsMixin, ApiAuthMixin, APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-# ==========
-# Driver
-# ==========
-class DriverGetApi(ApiErrorsMixin, ApiAuthMixin, APIView):
-    def get(self, request, user_id):
-
-        user = user_by_id_data(id=user_id)
-        fields = user_model_fields(user_data=user)
-
-        return Response({'fields': fields})
 
 
 

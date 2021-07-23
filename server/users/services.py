@@ -273,9 +273,3 @@ def user_make_token(*, email:int):
     token = PasswordResetTokenGenerator().make_token(user)
 
     return "%s%s%s" % (token, separator, uidb64 )
-
-        
-
-                
-                    
-        
