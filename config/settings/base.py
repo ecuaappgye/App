@@ -69,7 +69,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Add middlewares corsheaders
+    # Agregar middlewares de los cors para permitir el 
+    # acceso de fuentes externas.
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
@@ -110,16 +111,19 @@ DATABASES = {
     }
 }
 
-# Middlware corsheaders
+
+# Configuración sobre los cors
+# Permitir conecciones de fuentes externs.
 CORS_ORIGIN_ALLOW_ALL = True
 
-# Custom user
+# Uso del modelo usuario de la base del framework.
+# Personalizar modelo usuario.
 AUTH_USER_MODEL = "users.BaseUser"
 
-# Site ID
 SITE_ID = 1
 
-# Registro de emails
+# Registro de emails en la base de datos.
+# Si está desactivao, omite el respaldo.
 SAVE_SENT_EMAILS_TO_DB = True
 
 # Duración de dias del token generado de
@@ -150,58 +154,40 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'es'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = False
 
-# Saving storage
+
+# Carpeta destinada a almacenar los archivos estáticos.
 MEDIA_ROOT = os.path.join(os.getcwd(), 'media')
 
 
-# Email config
-
+# Configuración de servidor de correos
+# Esto afecta al envío de emails.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
 EMAIL_USE_TLS = True
-
 EMAIL_HOST = 'smtp.gmail.com'
-
 EMAIL_PORT = 587
-
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
-
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 
-# Send mail config
-
+# Configuración de credenciales de envío mensajes de texto.
 SMS_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
-
 SMS_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
-
 SMS_TWILIO_NUMBER = env('TWILIO_NUMBER', default='')
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-
 SITE_URL = 'http://localhost:3000/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# Rest framework and settings
+# Confguraciones personalizadas de rest framework
+# El despachador de errores es personalizado.
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'server.api.errors.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': []
