@@ -46,6 +46,7 @@ def user_create_verify(*, phone):
 
     return 'message'
 
+
 def user_update_profile(*, user_id:int, data)->BaseUser:
     """Servicio que permite actualizar los datos de perfil del usuario.
     Los campos declarados en el array de 'valid_fields' son únicamente
@@ -68,7 +69,7 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
         'cdi',
         'phone'
     ]
-
+    
     update_fields = []
     # Chequear si se ha enviado una imagen en la data.
     # Procesar la imagen

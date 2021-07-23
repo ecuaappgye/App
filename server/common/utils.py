@@ -1,3 +1,6 @@
+from rest_framework.exceptions import ValidationError
+
+
 def get_first_matching_attr(obj, *attrs, default=None):
     for attr in attrs:
         if hasattr(obj, attr):

@@ -40,7 +40,6 @@ class TestUserGetApi(TestCase):
         # "last_name": user.last_name,
         # "email": user.email,
         # "address": user.address,
-        # "avatar": user.avatar.url if user.avatar else None,
         # "cdi": user.cdi,
         # "phone": user.phone
         
@@ -63,7 +62,6 @@ class TestUserGetApi(TestCase):
              ('first_name', user.first_name),
              ('last_name', user.last_name),
              ('email', user.email),
-             ('avatar', user.avatar.url if user.avatar else None),
              ('cdi', user.cdi),
              ('phone', user.phone),
              ('address', user.address)])

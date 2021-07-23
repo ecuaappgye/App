@@ -17,7 +17,6 @@ class UserGetApi(ApiErrorsMixin, ApiAuthMixin, APIView):
         first_name = serializers.CharField()
         last_name = serializers.CharField()
         email = serializers.EmailField()
-        avatar = serializers.ImageField(default=None)
         cdi = serializers.CharField()
         phone = serializers.CharField()
         address = serializers.CharField()
@@ -52,7 +51,6 @@ class UserUpdateApi(ApiErrorsMixin, ApiAuthMixin, APIView):
         first_name = serializers.CharField()
         last_name = serializers.CharField()
         address = serializers.CharField()
-        avatar = serializers.ImageField(default=None, required=False)
         phone = serializers.CharField()
         cdi = serializers.CharField()
 
@@ -103,16 +101,14 @@ class UserLoginApi(APIView):
         user = authenticate(request, **serializer.validated_data)
         
         if user is None:
-            return Response({"message":"Credenciales no válidas."},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message":"Credenciales no válidas."}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Eliminar sesión si ya existe el usuario.
         # Borrar la sesión del usuario actual de la base de datos.
         # Denegar el acceso al usuario.
         session = user_unique_session(user=user)
         if session is not None:
-            return Response({"message":"Sesión ya utilizada."},
-                            status=status.HTTP_409_CONFLICT)
+            return Response({"message":"Sesión ya utilizada."},status=status.HTTP_409_CONFLICT)
 
         login(request, user)
         data = user_data(user=user)
