@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from rest_framework.test import APIClient
 from django.test import TestCase
 from server.common.test_utils import fake
@@ -49,15 +50,14 @@ class TestUserLoginApi(TestCase):
         # sesión aun continúa activa la api no deberá permitir el 
         # acceso y deberá responder 409 conflicto.
         # Elimina la sesión del usuario actualmente logueado con esas
-        # crendeciales.
+        # credeciales.
+        # En ésta prueba se simula el proceso de haber confirmado el 
+        # código enviado al celular.
+        # El campo ´is_active´ en True permite simular este proceso.
+        # En el caso de que esté en False ésta prueba falla.
         email =  fake.email()
         password = fake.password()
-        BaseUserFactory(email=email, password=password)
-        
-        # momentaneo =========================
-        x = BaseUser.objects.first()
-        x.is_active = True
-        x.save()
+        BaseUserFactory(email=email, password=password, is_active=True)
 
         credentials = {
             'email':email,
@@ -76,24 +76,47 @@ class TestUserLoginApi(TestCase):
         # Api responde con estado 401
         email =  fake.email()
         password = fake.password()
-        BaseUserFactory(email=email, password=password)
+        BaseUserFactory(email=email, password=password, is_active=True)
         
-        # momentaneo =========================
-        x = BaseUser.objects.first()
-        x.is_active = True
-        x.save()
-
-        crendentials = {
+        credentials = {
             'email': fake.email(),
             'password': fake.password
         }
-        response = self.client.post(self.url, crendentials)
+        response = self.client.post(self.url, credentials)
         self.assertEqual(401, response.status_code)
-
-
-
-
-
-        
-
     
+    def test_api_with_valid_credentials_and_return_current_session_with_user(self):
+        # Probando que la api responda con con estado correcto.
+        # La api debe retornar la sesión del usuario y la respectiva
+        # información en formato JSON.
+        email =  fake.email()
+        password = fake.password()
+        BaseUserFactory(email=email, password=password, is_active=True)
+        credentials = {
+            'email': email,
+            'password': password
+        }
+        response = self.client.post(self.url, credentials)
+        self.assertEqual(200, response.status_code)
+        # Una vez que se haya registrado un usuario debería almacenar
+        # la sesión como única y con una fecha de registro.
+        self.assertEqual(1, Session.objects.count())
+        # Obtener la sesión de la base de datos y comparar si coincide
+        # con la sesión devuelta por el usuario.
+        session = Session.objects.first().session_key
+        current_session = response.data.get('session')
+        self.assertEqual(session, current_session)
+        # Obtener los datos retornados relacionado con la información
+        # del usuario en sesión y verificar el formato.
+        user = BaseUser.objects.first()
+        expect = OrderedDict(
+            [('id', user.id),
+             ('first_name', user.first_name),
+             ('last_name', user.last_name),
+             ('email', user.email),
+             ('address', user.address),
+             ('avatar', user.avatar.url if user.avatar else None),
+             ('cdi', user.cdi),
+             ('phone', user.phone)])
+
+        self.assertEqual(expect, OrderedDict(response.data.get('data')))

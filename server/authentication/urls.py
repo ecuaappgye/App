@@ -9,7 +9,7 @@ from .apis import (UserEmailChange, UserGetApi, UserLoginApi, UserLogoutApi,
 authentication_urls = [
     path('get/<int:user_id>/', UserGetApi.as_view(), name='get'),
 
-    path('register/', UserRegisterApi.as_view()),
+    path('register/', UserRegisterApi.as_view(), name='register'),
     path('register/verify/<int:user_id>/', UserRegisterVerifyApi.as_view()),
     path('register/verify_check/<int:user_id>/', UserRegisterVerifyCheckApi.as_view()),
 

@@ -25,7 +25,8 @@ def user_create(*,
     last_name:str, 
     email:str, 
     password:str,
-    avatar
+    avatar,
+    is_active:bool
     )->BaseUser:
     
     user = BaseUser.objects.create_user(
@@ -34,6 +35,7 @@ def user_create(*,
         email=email,
         password=password,
         avatar=avatar,
+        is_active = is_active
     )
     
     return user
@@ -52,11 +54,9 @@ def user_create_verify_check(*, user_id:int, token):
         raise ValidationError('Código no correcto.')
     
     user = user_by_id(id=user_id)
-    user.is_active = True
-    user.save(update_fields=['is_active'])
+    user.update(is_active=True)
 
-    token_user.is_active = False
-    token_user.save()
+    token_user.update(is_active=False)
 
     return user
 

@@ -11,6 +11,7 @@ class BaseUserFactory(ServiceFactoryMixin, factory.django.DjangoModelFactory):
     email = factory.LazyAttribute(lambda _: fake.email())
     password = fake.password()
     avatar = None
+    is_active = False
 
     class Meta:
         model = BaseUser
