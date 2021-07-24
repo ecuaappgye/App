@@ -16,7 +16,6 @@ def user_data(*, user)->BaseUser:
 
     except Exception :
         raise ValidationError("Usuario no encontrado.")
-    
 
 def user_by_id(*, id:int)->BaseUser:
     try:

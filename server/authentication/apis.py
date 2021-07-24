@@ -5,7 +5,8 @@ from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
 from server.users.selectors import user_by_id, user_data
 from server.users.services import (user_create, user_create_verify,
-                                   user_create_verify_check, user_email_change,
+                                   user_create_verify_check,
+                                   user_deactive_session, user_email_change,
                                    user_password_change, user_password_reset,
                                    user_password_reset_check,
                                    user_unique_session, user_update_profile)
@@ -41,7 +42,33 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        user_create(**serializer.validated_data)
+        user = user_create(**serializer.validated_data)
+
+        return Response({'user_id':user.id}, status=status.HTTP_201_CREATED)
+
+
+class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        phone = serializers.CharField()
+    
+    def post(self, request, user_id):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user_create_verify(user_id=user_id, **serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class UserRegisterVerifyCheckApi(ApiErrorsMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        token = serializers.CharField()
+    
+    def post(self, request, user_id):
+        serializer = self.OutputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_create_verify_check(user_id=user_id, **serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -63,32 +90,6 @@ class UserUpdateApi(ApiErrorsMixin, ApiAuthMixin, APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
-    class OutputSerializer(serializers.Serializer):
-        phone = serializers.CharField()
-    
-    def post(self, request):
-        serializer = self.OutputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        user_create_verify(**serializer.validated_data)
-
-        return Response(status=status.HTTP_201_CREATED)
-
-
-class UserRegisterVerifyCheckApi(ApiErrorsMixin, APIView):
-    class OutputSerializer(serializers.Serializer):
-        code = serializers.CharField()
-    
-    def post(self, request):
-        serializer = self.OutputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user_create_verify_check(**serializer.validated_data)
-
-        return Response(status=status.HTTP_201_CREATED)
-
-
 class UserLoginApi(APIView):
     class OutputSerializer(serializers.Serializer):
         email = serializers.EmailField()
@@ -103,9 +104,6 @@ class UserLoginApi(APIView):
         if user is None:
             return Response({"message":"Credenciales no válidas."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Eliminar sesión si ya existe el usuario.
-        # Borrar la sesión del usuario actual de la base de datos.
-        # Denegar el acceso al usuario.
         session = user_unique_session(user=user)
         if session is not None:
             return Response({"message":"Sesión ya utilizada."},status=status.HTTP_409_CONFLICT)

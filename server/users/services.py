@@ -1,7 +1,8 @@
 from datetime import datetime
 from threading import Thread
 
-import six
+from django.contrib.auth import tokens
+
 from config.settings.env_reader import env
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sessions.models import Session
@@ -9,6 +10,8 @@ from django.core.exceptions import ValidationError
 from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from server.users.selectors import user_by_email, user_by_id
+from server.verify.selectors import callbacktoken_by_user
+from server.verify.services import send_token
 
 from .models import BaseUser
 from .utils import (send_email_email_change, send_email_password_change,
@@ -30,21 +33,32 @@ def user_create(*,
         last_name=last_name,
         email=email,
         password=password,
-        avatar=avatar
+        avatar=avatar,
     )
     
     return user
 
 
-def user_create_verify(*, phone):
-    if not phone:
-        raise ValidationError("Número telefónico requerido.")
+def user_create_verify(*, user_id:int, phone:str):
+    phone_valid(phone=phone)
+    send_token(user_id=user_id, alias_type='mobile', token_type='VERIFY')
     
-    print(phone)
-    
-    #message = send_sms_for_user(phone=phone, content='')
-
     return 'message'
+
+
+def user_create_verify_check(*, user_id:int, token):
+    token_user = callbacktoken_by_user(id=user_id)
+    if token_user.key != token:
+        raise ValidationError('Código no correcto.')
+    
+    user = user_by_id(id=user_id)
+    user.is_active = True
+    user.save(update_fields=['is_active'])
+
+    token_user.is_active = False
+    token_user.save()
+
+    return user
 
 
 def user_update_profile(*, user_id:int, data)->BaseUser:
@@ -86,15 +100,6 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
         return None
         
     user.save(update_fields=update_fields)
-
-    return user
-
-
-def user_create_verify_check(*, code):
-    user_id = 1
-    user = BaseUser.objects.get(id=user_id)
-    user.is_active = True
-    user.save(update_fields=['is_active'])
 
     return user
 
@@ -198,6 +203,9 @@ def user_email_change(*, user_id, email):
 # =============
 
 def user_unique_session(*, user):
+    # Eliminar sesión si ya existe el usuario.
+    # Borrar la sesión del usuario actual de la base de datos.
+    # Denegar el acceso al usuario.
     sessions = Session.objects.filter(expire_date__gte=datetime.now())
     if not sessions:
         return None
@@ -208,6 +216,14 @@ def user_unique_session(*, user):
             if user.id == int(session_decode.get('_auth_user_id')):
                 session.delete()
                 return True
+
+
+def user_deactive_session(*, user):
+    user = BaseUser.objects.get(pk=user.id)
+    user.is_active= False
+    user.save(update_fields=['is_active'])
+
+    return user
 
 # =================
 # Services methods
@@ -274,3 +290,13 @@ def user_make_token(*, email:int):
     token = PasswordResetTokenGenerator().make_token(user)
 
     return "%s%s%s" % (token, separator, uidb64 )
+
+
+def phone_valid(*, phone:str):
+    if not phone:
+        raise ValidationError("Número telefónico requerido.")
+
+    if not phone.isnumeric():
+        raise ValidationError('Número telefónico no válido.')
+    
+    return phone

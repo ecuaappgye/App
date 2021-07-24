@@ -10,8 +10,8 @@ authentication_urls = [
     path('get/<int:user_id>/', UserGetApi.as_view(), name='get'),
 
     path('register/', UserRegisterApi.as_view()),
-    path('register/verify/', UserRegisterVerifyApi.as_view()),
-    path('register/verify_check/', UserRegisterVerifyCheckApi.as_view()),
+    path('register/verify/<int:user_id>/', UserRegisterVerifyApi.as_view()),
+    path('register/verify_check/<int:user_id>/', UserRegisterVerifyCheckApi.as_view()),
 
     path('login/', UserLoginApi.as_view(), name='login'),
     path('logout/', UserLogoutApi.as_view(), name='logout'),
