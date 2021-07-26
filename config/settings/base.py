@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-from .cors import * 
+from .cors import *
 from .sessions import *
 from .env_reader import env
 import os
@@ -42,8 +42,7 @@ LOCAL_APPS = [
     "server.authentication.apps.AuthenticationConfig",
     "server.communication.apps.CommunicationConfig",
     "server.payments.apps.Paymentsconfig",
-    "server.verify.apps.VerifyConfig",
-    
+
 ]
 
 DEPENDENCIES_APPS = [
@@ -71,7 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Agregar middlewares de los cors para permitir el 
+    # Agregar middlewares de los cors para permitir el
     # acceso de fuentes externas.
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -131,7 +130,7 @@ SAVE_SENT_EMAILS_TO_DB = True
 # Duración de dias del token generado de
 # reestablecimiento de contraseñas.
 # 1 días en segundos.
-PASSWORD_RESET_TIMEOUT  = 84.600
+PASSWORD_RESET_TIMEOUT = 84.600
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

@@ -1,8 +1,6 @@
 from datetime import datetime
 from threading import Thread
 
-from django.contrib.auth import tokens
-
 from config.settings.env_reader import env
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sessions.models import Session
@@ -10,58 +8,36 @@ from django.core.exceptions import ValidationError
 from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from server.users.selectors import user_by_email, user_by_id
-from server.verify.selectors import callbacktoken_by_user
-from server.verify.services import send_token
 
 from .models import BaseUser
 from .utils import (send_email_email_change, send_email_password_change,
                     send_email_password_reset_check_for_user,
-                    send_email_password_reset_for_user, send_sms_for_user,
+                    send_email_password_reset_for_user,
                     validate_password)
 
 
 def user_create(*,
-    first_name:str,
-    last_name:str, 
-    email:str, 
-    password:str,
-    avatar,
-    is_active:bool
-    )->BaseUser:
-    
+                first_name: str,
+                last_name: str,
+                email: str,
+                password: str,
+                avatar,
+                is_active: bool
+                ) -> BaseUser:
+
     user = BaseUser.objects.create_user(
         first_name=first_name,
         last_name=last_name,
         email=email,
         password=password,
         avatar=avatar,
-        is_active = is_active
+        is_active=is_active
     )
-    
-    return user
-
-
-def user_create_verify(*, user_id:int, phone:str):
-    phone_valid(phone=phone)
-    send_token(user_id=user_id, alias_type='mobile', token_type='VERIFY')
-    
-    return 'message'
-
-
-def user_create_verify_check(*, user_id:int, token):
-    token_user = callbacktoken_by_user(id=user_id)
-    if token_user.key != token:
-        raise ValidationError('Código no correcto.')
-    
-    user = user_by_id(id=user_id)
-    user.update(is_active=True)
-
-    token_user.update(is_active=False)
 
     return user
 
 
-def user_update_profile(*, user_id:int, data)->BaseUser:
+def user_update_profile(*, user_id: int, data) -> BaseUser:
     """Servicio que permite actualizar los datos de perfil del usuario.
     Los campos declarados en el array de 'valid_fields' son únicamente
     permitidos por no ser considerados sensibles.
@@ -75,7 +51,7 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
     if not data:
         raise ValidationError("Campos requeridos.")
 
-    valid_fields =[
+    valid_fields = [
         'first_name',
         'last_name',
         'address',
@@ -83,14 +59,14 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
         'cdi',
         'phone'
     ]
-    
+
     update_fields = []
     # Chequear si se ha enviado una imagen en la data.
     # Procesar la imagen
-    avatar = data.get("avatar") 
+    avatar = data.get("avatar")
     if avatar:
         pass
-    
+
     for field in valid_fields:
         if field in data:
             setattr(user, field, data[field])
@@ -98,13 +74,13 @@ def user_update_profile(*, user_id:int, data)->BaseUser:
 
     if not update_fields:
         return None
-        
+
     user.save(update_fields=update_fields)
 
     return user
 
 
-def user_password_reset(*, email:str)->BaseUser:
+def user_password_reset(*, email: str) -> BaseUser:
     """Servicio que permite enviar un correo electrónico con
     un token para el reestablecimiento de contraseña. En en caso
     de que el correo no sea válido se enviara un error.
@@ -119,16 +95,16 @@ def user_password_reset(*, email:str)->BaseUser:
     extra_context = {"token": token}
     # Preparar un nuevo proceso en el sistema operativo.
     # Envío de email con coste computacional pesado.
-    Thread(target=send_email_password_reset_for_user, 
-         args=(user, extra_context)).start()
+    Thread(target=send_email_password_reset_for_user,
+           args=(user, extra_context)).start()
 
     return token
 
 
-def user_password_reset_check(*, token:str, new_password:str, password_confirm:str):
+def user_password_reset_check(*, token: str, new_password: str, password_confirm: str):
     """Servicio que permite revisar el token y la nueva contraseña para poder
     actualizar su nueva contraseña.
-    
+
     Parámetros:
     token -> Código de verificación
     new_password -> Nueva contraseña
@@ -155,17 +131,17 @@ def user_password_reset_check(*, token:str, new_password:str, password_confirm:s
     # Envío de notificaciones utilizando un nuevo proceso
     # del sisteama operativo.
     Thread(target=send_email_password_reset_check_for_user,
-        args=(user, None)).start()
+           args=(user, None)).start()
 
     return user
 
 
-def user_password_change(*, user_id:int, old_password:str, new_password:str, password_confirm):
+def user_password_change(*, user_id: int, old_password: str, new_password: str, password_confirm):
     user = user_by_id(id=user_id)
 
     if new_password != password_confirm:
         raise ValidationError("Contraseñas no coinciden.")
-    
+
     # Validar si la contraseña enviada es válida
     if not user.check_password(old_password):
         raise ValidationError("Contraseña anterior no es válida.")
@@ -176,14 +152,14 @@ def user_password_change(*, user_id:int, old_password:str, new_password:str, pas
 
     # Envío de notificación en un nuevo proceso.
     Thread(target=send_email_password_change,
-        args=(user, None)).start()
+           args=(user, None)).start()
 
     return user
 
 
 def user_email_change(*, user_id, email):
     """Servicio que permite cambiar de cuenta de correo electrónico.
-    
+
     Parámetros:
     user_id -> Identificación del usuario
     email -> Nuevo correo electrónico
@@ -201,6 +177,7 @@ def user_email_change(*, user_id, email):
 # =============
 # Sessions
 # =============
+
 
 def user_unique_session(*, user):
     # Eliminar sesión si ya existe el usuario.
@@ -220,7 +197,7 @@ def user_unique_session(*, user):
 
 def user_deactive_session(*, user):
     user = BaseUser.objects.get(pk=user.id)
-    user.is_active= False
+    user.is_active = False
     user.save(update_fields=['is_active'])
 
     return user
@@ -228,6 +205,7 @@ def user_deactive_session(*, user):
 # =================
 # Services methods
 # =================
+
 
 def user_extract_uidb64(*, token: str) -> str:
     separator = '_'
@@ -250,7 +228,7 @@ def user_extract_token(*, token: str) -> str:
     try:
         # Remover espacios en blanco del token.
         token_strip = token.strip()
-        # Encontrar el separador dentro del token. 
+        # Encontrar el separador dentro del token.
         extract_token = token_strip.find(separator)
         if not extract_token != -1:
             raise ValidationError('Código inválido.')
@@ -278,7 +256,7 @@ def user_check_token(*, uidb64: int, token: str) -> BaseUser:
     return user
 
 
-def user_make_token(*, email:int):
+def user_make_token(*, email: int):
     """Servicio que permite crear un token aleatorio con fecha
     de caducidad detallado en las configuraciones a partir del
     email del usuario.
@@ -289,14 +267,4 @@ def user_make_token(*, email:int):
     uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
     token = PasswordResetTokenGenerator().make_token(user)
 
-    return "%s%s%s" % (token, separator, uidb64 )
-
-
-def phone_valid(*, phone:str):
-    if not phone:
-        raise ValidationError("Número telefónico requerido.")
-
-    if not phone.isnumeric():
-        raise ValidationError('Número telefónico no válido.')
-    
-    return phone
+    return "%s%s%s" % (token, separator, uidb64)

@@ -3,31 +3,12 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
+from .services import user_create_verify, user_create_verify_check
 from server.users.selectors import user_by_id, user_data
-from server.users.services import (user_create, user_create_verify,
-                                   user_create_verify_check,
-                                   user_deactive_session, user_email_change,
+from server.users.services import (user_create, user_email_change,
                                    user_password_change, user_password_reset,
                                    user_password_reset_check,
                                    user_unique_session, user_update_profile)
-
-
-class UserGetApi(ApiErrorsMixin, ApiAuthMixin, APIView):
-    class OutputSerializer(serializers.Serializer):
-        id = serializers.IntegerField()
-        first_name = serializers.CharField()
-        last_name = serializers.CharField()
-        email = serializers.EmailField()
-        cdi = serializers.CharField()
-        phone = serializers.CharField()
-        address = serializers.CharField()
-
-    def get(self, request, user_id):
-
-        user = user_by_id(id=user_id)
-        data = self.OutputSerializer(user).data
-
-        return Response(data)
 
 
 class UserRegisterApi(ApiErrorsMixin, APIView):
@@ -42,20 +23,20 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         user = user_create(**serializer.validated_data)
 
-        return Response({'user_id':user.id}, status=status.HTTP_201_CREATED)
+        return Response({'user_id': user.id}, status=status.HTTP_201_CREATED)
 
 
 class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         phone = serializers.CharField()
-    
+
     def post(self, request, user_id):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         user_create_verify(user_id=user_id, **serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
@@ -64,7 +45,7 @@ class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
 class UserRegisterVerifyCheckApi(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         token = serializers.CharField()
-    
+
     def post(self, request, user_id):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -85,7 +66,7 @@ class UserUpdateApi(ApiErrorsMixin, ApiAuthMixin, APIView):
     def post(self, request, user_id):
         serializer = self.Inputerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         user_update_profile(user_id=user_id, data=serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
@@ -95,26 +76,26 @@ class UserLoginApi(APIView):
     class OutputSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField()
-    
+
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = authenticate(request, **serializer.validated_data)
-        
+
         if user is None:
-            return Response({"message":"Credenciales no válidas."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message": "Credenciales no válidas."}, status=status.HTTP_401_UNAUTHORIZED)
 
         session = user_unique_session(user=user)
         if session is not None:
-            return Response({"message":"Sesión ya utilizada."},status=status.HTTP_409_CONFLICT)
+            return Response({"message": "Sesión ya utilizada."}, status=status.HTTP_409_CONFLICT)
 
         login(request, user)
         data = user_data(user=user)
 
         return Response({
-            "data":data,
-            "session":request.session.session_key
+            "data": data,
+            "session": request.session.session_key
         })
 
 
@@ -123,12 +104,12 @@ class UserLogoutApi(ApiAuthMixin, APIView):
         logout(request)
 
         return Response(status=status.HTTP_201_CREATED)
-        
+
 
 class UserPasswordReset(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         email = serializers.EmailField()
-    
+
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -171,7 +152,7 @@ class UserPasswordChange(ApiErrorsMixin, ApiAuthMixin, APIView):
 class UserEmailChange(ApiErrorsMixin, ApiAuthMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         email = serializers.EmailField()
-    
+
     def post(self, request, user_id):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -181,6 +162,19 @@ class UserEmailChange(ApiErrorsMixin, ApiAuthMixin, APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
+class UserGetApi(ApiErrorsMixin, ApiAuthMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        first_name = serializers.CharField()
+        last_name = serializers.CharField()
+        email = serializers.EmailField()
+        cdi = serializers.CharField()
+        phone = serializers.CharField()
+        address = serializers.CharField()
 
+    def get(self, request, user_id):
 
+        user = user_by_id(id=user_id)
+        data = self.OutputSerializer(user).data
 
+        return Response(data)
