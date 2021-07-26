@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import Base, patch
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -19,7 +19,7 @@ class UserCreate(TestCase):
         # suficientemente robusta.
         with self.assertRaises(ValidationError):
             BaseUserFactory(password=fake.password(length=5, digits=False))
-        
+
     @ patch('server.users.services.user_create')
     def test_service_with_email_already_exists(self, user_create_mock):
         # Servicio con un email ya existente.
@@ -31,7 +31,7 @@ class UserCreate(TestCase):
 
     @ patch('server.users.services.user_create')
     def test_service_with_password_none(self, user_create_mock):
-        # Cuando se registra un usuario y si éste 
+        # Cuando se registra un usuario y si éste
         # envia como contraseña ´none´ o considerado como vacío.
         with self.assertRaises(ValidationError):
             BaseUserFactory(password=None)
@@ -40,15 +40,14 @@ class UserCreate(TestCase):
     def test_service_without_avatar(self, user_create_mock):
         # El registro de usuarios no tiene como obligatorio
         # el atributo avatar.
-        BaseUserFactory(avatar= None)
+        BaseUserFactory(avatar=None)
         self.assertEqual(1, BaseUser.objects.count())
-        
 
-
-
-    
-
-    
-
-
-    
+    @ patch('server.users.services.user_create')
+    def test_service_and_check_account_inactive(self, user_create_mock):
+        # Cuando un usuario se registra no puede permitir
+        # que su atributo `is_active` sea True.
+        # Para ello el servicio debe crear una cuenta desactivada.
+        BaseUserFactory()
+        self.assertEqual(1, BaseUser.objects.count())
+        self.assertFalse(BaseUser.objects.first().is_active)
