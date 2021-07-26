@@ -25,7 +25,7 @@ class CallbackToken(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         app_label = 'authentication'

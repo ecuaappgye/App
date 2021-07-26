@@ -1,14 +1,16 @@
 from django.contrib.auth import authenticate, login, logout
+from django.core.validators import RegexValidator
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
-from .services import user_create_verify, user_create_verify_check
 from server.users.selectors import user_by_id, user_data
 from server.users.services import (user_create, user_email_change,
                                    user_password_change, user_password_reset,
                                    user_password_reset_check,
                                    user_unique_session, user_update_profile)
+
+from .services import user_create_verify, user_create_verify_check
 
 
 class UserRegisterApi(ApiErrorsMixin, APIView):
@@ -31,7 +33,9 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
 
 class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
-        phone = serializers.CharField()
+        phone_regex = RegexValidator(regex=r'^\+593\d{1,12}$',
+                                     message="Formato no válido. +593969164841")
+        phone = serializers.CharField(validators=[phone_regex], max_length=15)
 
     def post(self, request, user_id):
         serializer = self.OutputSerializer(data=request.data)
