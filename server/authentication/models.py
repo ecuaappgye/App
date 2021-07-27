@@ -1,14 +1,6 @@
-import string
-
 from django.db import models
-from django.utils import timezone
-from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
-
-
-def generate_numeric_token():
-    # Genera un cadena string con una longitud máxima de 6 dígitos.
-    return get_random_string(length=6, allowed_chars=string.digits)
+from .utils import generate_numeric_token
 
 
 class CallbackToken(models.Model):

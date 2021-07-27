@@ -92,15 +92,12 @@ def validate_token_age(*, token: CallbackToken):
     """Permite determinar si un token determinado a caducado.
 
     Parámetros:
-    key -> Clave de token.
+    token -> Token del usuario.
     """
     try:
         token = CallbackToken.objects.get(key=token.key, is_active=True)
-        print(token)
         seconds = (timezone.now() - token.created_at).total_seconds()
         token_expiry_time = settings.VERIFY_TOKEN_EXPIRE_TIME
-        print('segundos que dura el token', token_expiry_time)
-        print('segundos transcurridos', seconds)
         if seconds <= token_expiry_time:
             raise ValidationError(settings.VERIFY_TOKEN_EXPIRED_MESSAGE)
 
