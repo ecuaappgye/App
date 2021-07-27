@@ -1,12 +1,13 @@
+import email
 from django.contrib.auth import authenticate, login, logout
-from django.core.validators import RegexValidator
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
 from server.users.selectors import user_by_email, user_by_id, user_data
-from server.users.services import (user_create, user_email_change,
-                                   user_password_change, user_password_reset,
+from server.users.services import (user_account_active, user_create,
+                                   user_email_change, user_password_change,
+                                   user_password_reset,
                                    user_password_reset_check,
                                    user_unique_session, user_update_profile)
 
@@ -83,8 +84,10 @@ class UserLoginApi(APIView):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        if not user_account_active(email=email):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         user = authenticate(request, **serializer.validated_data)
-        
         if user is None:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
@@ -95,10 +98,7 @@ class UserLoginApi(APIView):
         login(request, user)
         data = user_data(user=user)
 
-        return Response({
-            "data": data,
-            "session": request.session.session_key
-        })
+        return Response({"data": data,"session": request.session.session_key})
 
 
 class UserLogoutApi(ApiAuthMixin, APIView):

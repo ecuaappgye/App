@@ -16,13 +16,12 @@ from .utils import (send_email_email_change, send_email_password_change,
                     validate_password)
 
 
-def user_create(*,
-                first_name: str,
+def user_create(*,first_name: str,
                 last_name: str,
                 email: str,
                 password: str,
                 avatar,
-                is_active: bool=False
+                is_active: bool= False
                 ) -> BaseUser:
 
     user = BaseUser.objects.create_user(
@@ -193,18 +192,18 @@ def user_unique_session(*, user):
                 session.delete()
                 return True
 
-
-def user_deactive_session(*, user):
-    user = BaseUser.objects.get(pk=user.id)
-    user.is_active = False
-    user.save(update_fields=['is_active'])
-
-    return user
+def user_account_active(*, email:str):
+    """Función que permite determinar si la cuenta de un usuario 
+    está activa.
+    """
+    try:
+        return BaseUser.objects.get(email=email).is_active
+    except BaseUser.DoesNotExist:
+        return None
 
 # =================
 # Services methods
 # =================
-
 
 def user_extract_uidb64(*, token: str) -> str:
     separator = '_'
