@@ -8,3 +8,5 @@ VERIFY_TOKEN_EXPIRE_TIME = 15 * 60
 VERIFY_TOKEN_EXPIRED_MESSAGE = "Código de activación ha caducado."
 
 VERIFY_TOKEN_GENERATION_ATTEMPTS = 3
+
+VERIFY_PHONE_FORMAT_INVALID = "Formato de número telefónico no válido."

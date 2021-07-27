@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -17,6 +19,9 @@ def user_create_verify(*, user_id: int, phone: str):
     user_id  -> Identificador del usuario al que vamos a enlazar.
     phone -> Número telefónico
     """
+    if not validate_phone_format(phone=phone):
+        raise ValidationError(settings.VERIFY_PHONE_FORMAT_INVALID)
+
     token = create_token_callback_for_user(user_id=user_id,
                                            alias_type='mobile',
                                            token_type=CallbackToken.TOKEN_TYPE_AUTH)
@@ -36,6 +41,9 @@ def user_create_verify_check(*, user_id: int, token: str):
     user_id  -> Identificador del usuario al que vamos a enlazar.
     token -> Código de verificación enviado al móvil.
     """
+    if not token:
+        raise ValidationError(settings.VERIFY_PHONE_FORMAT_INVALID)
+
     token_user = callback_token_by_user_id(id=user_id)
     if token != token_user.key:
         raise ValidationError('Código no válido.')
@@ -113,3 +121,10 @@ def validate_token_age(*, callbacktoken: CallbackToken):
 
     except CallbackToken.DoesNotExist:
         return None
+
+
+def validate_phone_format(*, phone):
+    if not phone:
+        raise ValidationError(settings.VERIFY_PHONE_FORMAT_INVALID)
+        
+    return re.match(r'^\+593\d{1,12}$', phone)

@@ -4,7 +4,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
-from server.users.selectors import user_by_id, user_data
+from server.users.selectors import user_by_email, user_by_id, user_data
 from server.users.services import (user_create, user_email_change,
                                    user_password_change, user_password_reset,
                                    user_password_reset_check,
@@ -33,9 +33,7 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
 
 class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
-        phone_regex = RegexValidator(regex=r'^\+593\d{1,12}$',
-                                     message="Formato no válido. +593969164841")
-        phone = serializers.CharField(validators=[phone_regex], max_length=15)
+        phone = serializers.CharField(max_length=15)
 
     def post(self, request, user_id):
         serializer = self.OutputSerializer(data=request.data)
@@ -86,13 +84,13 @@ class UserLoginApi(APIView):
         serializer.is_valid(raise_exception=True)
 
         user = authenticate(request, **serializer.validated_data)
-
+        
         if user is None:
-            return Response({"message": "Credenciales no válidas."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         session = user_unique_session(user=user)
         if session is not None:
-            return Response({"message": "Sesión ya utilizada."}, status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_409_CONFLICT)
 
         login(request, user)
         data = user_data(user=user)
