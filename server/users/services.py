@@ -22,7 +22,7 @@ def user_create(*,
                 email: str,
                 password: str,
                 avatar,
-                is_active: bool
+                is_active: bool=False
                 ) -> BaseUser:
 
     user = BaseUser.objects.create_user(
@@ -31,8 +31,7 @@ def user_create(*,
         email=email,
         password=password,
         avatar=avatar,
-        is_active=is_active
-    )
+        is_active=is_active)
 
     return user
 

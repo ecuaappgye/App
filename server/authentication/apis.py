@@ -20,7 +20,6 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
         email = serializers.EmailField()
         avatar = serializers.ImageField(default=None)
         password = serializers.CharField()
-        is_active = serializers.BooleanField(required=False)
 
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
@@ -28,7 +27,8 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
 
         user = user_create(**serializer.validated_data)
 
-        return Response({'user_id': user.id}, status=status.HTTP_201_CREATED)
+        return Response({'user_id': user.id, 'is_active':user.is_active},
+                        status=status.HTTP_201_CREATED)
 
 
 class UserRegisterVerifyApi(ApiErrorsMixin, APIView):

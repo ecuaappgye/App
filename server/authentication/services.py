@@ -20,7 +20,7 @@ def user_create_verify(*, user_id: int, phone: str):
     token = create_token_callback_for_user(user_id=user_id,
                                            alias_type='mobile',
                                            token_type=CallbackToken.TOKEN_TYPE_AUTH)
-    print(token)
+
     invalidate_previous_tokens(user_id=user_id, callback_token_id=token.id)
 
     #send_sms_with_callback_token(phone=phone, key=token.key)
@@ -40,7 +40,7 @@ def user_create_verify_check(*, user_id: int, token: str):
     if token != token_user.key:
         raise ValidationError('Código no válido.')
 
-    validate_token_age(token=token_user)
+    validate_token_age(callbacktoken=token_user)
 
     user = user_by_id(id=user_id)
     user.is_active = True
@@ -63,10 +63,10 @@ def send_sms_with_callback_token(*, phone: str, key: str):
     el servicio de Twilio.
     """
     client = Client(settings.SMS_ACCOUNT_SID, settings.SMS_AUTH_TOKEN)
-    message = client.messages.create(to='+593969164843',
+    message = client.messages.create(body=settings.VERIFY_MOBILE_MESSAGE % key,
                                      from_=settings.SMS_TWILIO_NUMBER,
-                                     body=settings.VERIFY_MOBILE_MESSAGE % key)
-
+                                     to='+593969164843')
+                                    
     return message
 
 
@@ -88,22 +88,28 @@ def invalidate_previous_tokens(*, user_id: int, callback_token_id: int):
     return tokens
 
 
-def validate_token_age(*, token: CallbackToken):
+def validate_token_age(*, callbacktoken: CallbackToken):
     """Permite determinar si un token determinado a caducado.
 
     Parámetros:
     token -> Token del usuario.
     """
     try:
-        token = CallbackToken.objects.get(key=token.key, is_active=True)
+
+        token = CallbackToken.objects.get(key=callbacktoken.key, is_active=True)
         seconds = (timezone.now() - token.created_at).total_seconds()
         token_expiry_time = settings.VERIFY_TOKEN_EXPIRE_TIME
-        if seconds <= token_expiry_time:
+
+        # Segundos trasncurrido desde el envío del token supera el vencimiento.
+        if seconds >= token_expiry_time:
             raise ValidationError(settings.VERIFY_TOKEN_EXPIRED_MESSAGE)
 
         # Desactivar el token.
+        # Token con atributo is active en False 
         token.is_active = False
         token.save(update_fields=['is_active'])
+
+        return token
 
     except CallbackToken.DoesNotExist:
         return None

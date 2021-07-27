@@ -1,13 +1,7 @@
-from collections import OrderedDict
-from django.urls.base import resolve
 from rest_framework.test import APIClient
 from django.test import TestCase
 from server.common.test_utils import fake
 from django.urls import reverse
-from server.users.services import user_create
-from server.users.models import BaseUser
-from server.users.factories import BaseUserFactory
-from django.contrib.sessions.models import Session
 
 
 class TestUserLoginApi(TestCase):
@@ -28,12 +22,10 @@ class TestUserLoginApi(TestCase):
         # La api de inicio de sesion (login) debería responder con 
         # estado no válido.
         email, password = fake.email(), fake.password()
-        data = {
-            'first_name': fake.first_name(),
-            'last_name': fake.last_name(),
-            'email': email,
-            'password': password
-        }
+        data = {'first_name': fake.first_name(),
+                'last_name': fake.last_name(),
+                'email': email,
+                'password': password}
         response = self.client.post(self.url, data)
         self.assertEqual(201, response.status_code)
         # Verificar que la api no permita autenticar usuarios.
