@@ -177,7 +177,6 @@ def user_email_change(*, user_id, email):
 # Sessions
 # =============
 
-
 def user_unique_session(*, user):
     # Eliminar sesión si ya existe el usuario.
     # Borrar la sesión del usuario actual de la base de datos.
