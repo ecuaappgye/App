@@ -16,7 +16,7 @@ class UserCreate(TestCase):
     @ patch('server.authentication.services.user_create_verify_check')
     def test_service_with_user_not_souch_found(self, user_create_verify_check_mock):
         with self.assertRaises(ValidationError):
-            self.service(user_id=fake.random_digit(), token=fake.random_number(digits=3))
+            self.service(user_id=fake.random_digit(), token=fake.random_number(digits=6))
     
     @ patch('server.authentication.services.user_create_verify_check')
     def test_service_with_token_none(self, user_create_verify_check_mock):

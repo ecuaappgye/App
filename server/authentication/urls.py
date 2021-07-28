@@ -8,8 +8,8 @@ from .apis import (UserEmailChange, UserGetApi, UserLoginApi, UserLogoutApi,
 
 authentication_urls = [
     path('register/', UserRegisterApi.as_view(), name='register'),
-    path('register/verify/<int:user_id>/', UserRegisterVerifyApi.as_view()),
-    path('register/verify_check/<int:user_id>/', UserRegisterVerifyCheckApi.as_view()),
+    path('register/verify/<int:user_id>/', UserRegisterVerifyApi.as_view(), name='register_verify'),
+    path('register/verify_check/<int:user_id>/', UserRegisterVerifyCheckApi.as_view(), name='register_verify_check'),
 
     path('login/', UserLoginApi.as_view(), name='login'),
     path('logout/', UserLogoutApi.as_view(), name='logout'),
