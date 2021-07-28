@@ -34,9 +34,6 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-# Application definition
-
-
 LOCAL_APPS = [
     "server.common.apps.CommonConfig",
     "server.api.apps.ApiConfig",
@@ -44,7 +41,6 @@ LOCAL_APPS = [
     "server.authentication.apps.AuthenticationConfig",
     "server.communication.apps.CommunicationConfig",
     "server.payments.apps.Paymentsconfig",
-
 ]
 
 DEPENDENCIES_APPS = [
@@ -98,10 +94,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -134,9 +126,6 @@ SAVE_SENT_EMAILS_TO_DB = True
 # 1 días en segundos.
 PASSWORD_RESET_TIMEOUT = 84.600
 
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -151,10 +140,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'es'
 TIME_ZONE = 'America/Guayaquil'
@@ -189,8 +174,8 @@ SITE_URL = 'http://localhost:3000/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Confguraciones personalizadas de rest framework
-# El despachador de errores es personalizado.
+# Configuraciones personalizadas de rest framework
+# El despachador de errores es personalizado custom_exception_handler.
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'server.api.errors.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': []
