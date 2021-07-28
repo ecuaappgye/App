@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import BaseUser, DocumentTypeRol, Rol, DocumentType, UserDocumentTypeRol
 from django.contrib.sessions.models import Session
+from django.utils.translation import gettext_lazy as _
+
 
 class BaseUserAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'

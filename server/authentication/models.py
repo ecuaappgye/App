@@ -6,7 +6,11 @@ from .utils import generate_numeric_token
 class CallbackToken(models.Model):
     TOKEN_TYPE_AUTH = 'AUTH'
     TOKEN_TYPE_VERIFY = 'VERIFY'
-    TOKEN_TYPES = ((TOKEN_TYPE_AUTH, 'Auth'), (TOKEN_TYPE_VERIFY, 'Verify'))
+    TOKEN_PASSWORD_RESET = 'PASSWORD_RESET'
+    TOKEN_TYPES = (
+        (TOKEN_TYPE_AUTH, 'Autenticación'),
+        (TOKEN_TYPE_VERIFY , '  Verificación'),
+        (TOKEN_PASSWORD_RESET, 'Reestablecer contraseña'))
 
     user = models.ForeignKey(
         'users.BaseUser', on_delete=models.CASCADE, null=True, blank=True)
