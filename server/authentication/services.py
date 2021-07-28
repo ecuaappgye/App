@@ -28,7 +28,7 @@ def user_create_verify(*, user_id: int, phone: str):
 
     invalidate_previous_tokens(user_id=user_id, callback_token_id=token.id)
 
-    send_sms_with_callback_token(phone=phone, key=token.key)
+    #send_sms_with_callback_token(phone=phone, key=token.key)
 
 
 def user_create_verify_check(*, user_id: int, token: str):
