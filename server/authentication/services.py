@@ -28,7 +28,7 @@ def user_create_verify(*, user_id: int, phone: str):
 
     invalidate_previous_tokens(user_id=user_id, callback_token_id=token.id)
 
-    #send_sms_with_callback_token(phone=phone, key=token.key)
+    send_sms_with_callback_token(phone=phone, key=token.key)
 
 
 def user_create_verify_check(*, user_id: int, token: str):
@@ -46,7 +46,7 @@ def user_create_verify_check(*, user_id: int, token: str):
 
     token_user = callback_token_by_user_id(id=user_id)
     if token != token_user.key:
-        raise ValidationError('Código no válido.')
+        raise ValidationError(settings.VERIFY_PHONE_INVALID)
 
     validate_token_age(callbacktoken=token_user)
 
@@ -57,7 +57,7 @@ def user_create_verify_check(*, user_id: int, token: str):
     return token_user
 
 
-def create_token_callback_for_user(*, user_id, alias_type, token_type):
+def create_token_callback_for_user(*, user_id, alias_type, token_type):        
     token = CallbackToken(user_id=user_id,
                           to_alias_type=alias_type.upper(),
                           to_alias=alias_type, type=token_type)
@@ -71,16 +71,16 @@ def send_sms_with_callback_token(*, phone: str, key: str):
     el servicio de Twilio.
     """
     client = Client(settings.SMS_ACCOUNT_SID, settings.SMS_AUTH_TOKEN)
-    message = client.messages.create(body=settings.VERIFY_MOBILE_MESSAGE % key,
-                                     from_=settings.SMS_TWILIO_NUMBER,
-                                     to='+593969164843')
+    # message = client.messages.create(body=settings.VERIFY_MOBILE_MESSAGE % key,
+    #                                  from_=settings.SMS_TWILIO_NUMBER,
+    #                                  to='+593969164843')
                                     
-    return message
+    # return 'message'
 
 
 def invalidate_previous_tokens(*, user_id: int, callback_token_id: int):
     """Cuando se emite un nuevo hay que desactivar todos los
-    token relacionados con ese usuario
+    token relacionados con ese usuario.
 
     Parámetros:
     user_id -> Identificador del usuario en sesión

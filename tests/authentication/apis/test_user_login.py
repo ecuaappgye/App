@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from server.common.test_utils import fake
 from django.urls import reverse
-from server.users.services import user_create
 from server.users.models import BaseUser
 from server.users.factories import BaseUserFactory
 from django.contrib.sessions.models import Session
@@ -58,15 +57,10 @@ class TestUserLoginApi(TestCase):
         email =  fake.email()
         password = fake.password()
         BaseUserFactory(email=email, password=password, is_active=True)
-
-        credentials = {
-            'email':email,
-            'password': password
-        }
+        credentials = {'email':email, 'password': password}
         response = self.client.post(self.url, credentials)
         self.assertEqual(200, response.status_code)
-
-        # Iniciar sesión con credenciales del mismo usuario
+        # Iniciar sesión con credenciales dclsel mismo usuario
         response_already_login = self.client.post(self.url, credentials)
         self.assertEqual(409, response_already_login.status_code)
         self.assertEqual(0, Session.objects.count())
@@ -91,7 +85,7 @@ class TestUserLoginApi(TestCase):
         # información en formato JSON.
         email =  fake.email()
         password = fake.password()
-        BaseUserFactory(email=email, password=password, is_active=True)
+        user = BaseUserFactory(email=email, password=password, is_active=True)
         credentials = {
             'email': email,
             'password': password

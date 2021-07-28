@@ -83,8 +83,8 @@ class UserLoginApi(APIView):
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        if not user_account_active(email=email):
+        
+        if user_account_active(email=email) is False:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         user = authenticate(request, **serializer.validated_data)

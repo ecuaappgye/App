@@ -26,6 +26,7 @@ class UserCreate(TestCase):
     @ patch('server.authentication.services.user_create_verify')
     def test_service_with_number_phone_invalid_format(self, user_create_verify_mock):
         # Servicio valida que el número telefónico este regido al formato ´+593..´
+        # Servicio envia error en el caso del formato no válido.
         user = BaseUserFactory()
         self.assertEqual(1, BaseUser.objects.count())
 
@@ -46,7 +47,6 @@ class UserCreate(TestCase):
         # Si un usuario ya ha sido notificado con un código el servicio debería
         # invalidar los token previos.
         user = BaseUserFactory()
-
         self.service(user_id=user.id, phone=fake.bothify(text='+593#########'))
         self.assertTrue(CallbackToken.objects.first().is_active)
         self.assertTrue(send_sms_with_callback_token_mock.called)
@@ -54,5 +54,4 @@ class UserCreate(TestCase):
         self.service(user_id=user.id, phone=fake.bothify(text='+593#########'))
         self.assertTrue(send_sms_with_callback_token_mock.called)
         self.assertEqual(2,  CallbackToken.objects.count())
-
         #self.assertFalse(CallbackToken.objects.last().is_active)

@@ -3,7 +3,7 @@ from unittest.mock import patch
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from server.authentication.models import CallbackToken
-from server.authentication.services import user_create_verify_check
+from server.authentication.services import user_create_verify_check, user_create_verify
 from server.common.test_utils import fake
 from server.users.factories import BaseUserFactory
 from server.users.models import BaseUser
@@ -25,3 +25,27 @@ class UserCreate(TestCase):
 
         with self.assertRaises(ValidationError):
             self.service(user_id=user.id, token=None)
+    
+    @ patch('server.authentication.services.user_create_verify_check')
+    def test_service_with_invalid_code(self, user_create_verify_check_mock):
+        # El servicio se asegura que el código recibido sea correcto.
+        # El servicio se asegura de enviar error.
+        user = BaseUserFactory()
+        user_create_verify(user_id=user.id, phone=fake.bothify(text='+593#########'))
+        self.assertEqual(1, CallbackToken.objects.count())
+
+        with self.assertRaises(ValidationError):
+            self.service(user_id=user.id, token=fake.random_number(digits=6))
+    
+    @ patch('server.authentication.services.validate_token_age')
+    def test_service_with_valid_token_and_active_account_user(self, validate_token_age_mock):
+        # El servicio activa la cuenta del usuario una vez que se ha enviado el token
+        # correcto. El atributo del usuario de ´is_active´ pasa a True para poder permitir
+        # el inicio de sesión.
+        user = BaseUserFactory()
+        user_create_verify(user_id=user.id, phone=fake.bothify(text='+593#########'))
+        self.assertEqual(1, CallbackToken.objects.count())
+
+        self.service(user_id=user.id, token=CallbackToken.objects.first().key)
+        self.assertTrue(BaseUser.objects.first().is_active)
+        self.assertTrue(validate_token_age_mock.called)

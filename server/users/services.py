@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.utils.encoding import force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from server.users.selectors import user_by_email, user_by_id
+from django.conf import settings
 
 from .models import BaseUser
 from .utils import (send_email_email_change, send_email_password_change,
@@ -21,7 +22,7 @@ def user_create(*,first_name: str,
                 email: str,
                 password: str,
                 avatar,
-                is_active: bool= False
+                is_active: bool=False
                 ) -> BaseUser:
 
     user = BaseUser.objects.create_user(
@@ -47,7 +48,7 @@ def user_update_profile(*, user_id: int, data) -> BaseUser:
     user = user_by_id(id=user_id)
 
     if not data:
-        raise ValidationError("Campos requeridos.")
+        raise ValidationError(settings.USER_REQUIRED_FIELDS)
 
     valid_fields = [
         'first_name',
@@ -191,6 +192,7 @@ def user_unique_session(*, user):
             if user.id == int(session_decode.get('_auth_user_id')):
                 session.delete()
                 return True
+
 
 def user_account_active(*, email:str):
     """Función que permite determinar si la cuenta de un usuario 
