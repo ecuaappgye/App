@@ -10,7 +10,7 @@ from .models import CallbackToken
 from .selectors import callback_token_by_user_id
 
 
-def user_create_verify(*, user_id: int, phone: str):
+def user_create_verify(*, user_id: int, phone: str, ip_address:str=None, user_agent:str=None):
     """Servicio que permite realizar el registro del token 
     generado y posteriormente el envío del mismo a traves
     del servicio de mensajería de Twilio.
@@ -24,11 +24,13 @@ def user_create_verify(*, user_id: int, phone: str):
 
     token = create_token_callback_for_user(user_id=user_id,
                                            alias_type='mobile',
-                                           token_type=CallbackToken.TOKEN_TYPE_AUTH)
+                                           token_type=CallbackToken.TOKEN_TYPE_AUTH,
+                                           ip_address=ip_address,
+                                           user_agent=user_agent)
 
     invalidate_previous_tokens(user_id=user_id, callback_token_id=token.id)
 
-    #send_sms_with_callback_token(phone=phone, key=token.key)
+    send_sms_with_callback_token(phone=phone, key=token.key)
 
 
 def user_create_verify_check(*, user_id: int, token: str):
@@ -57,10 +59,12 @@ def user_create_verify_check(*, user_id: int, token: str):
     return token_user
 
 
-def create_token_callback_for_user(*, user_id, alias_type, token_type):        
+def create_token_callback_for_user(*, user_id, alias_type, token_type, ip_address, user_agent):        
     token = CallbackToken(user_id=user_id,
                           to_alias_type=alias_type.upper(),
-                          to_alias=alias_type, type=token_type)
+                          to_alias=alias_type, type=token_type,
+                          user_agent=user_agent,
+                          ip_address=ip_address)
     token.save()
 
     return token

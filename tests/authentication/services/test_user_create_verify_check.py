@@ -31,11 +31,14 @@ class UserCreate(TestCase):
         # El servicio se asegura que el código recibido sea correcto.
         # El servicio se asegura de enviar error.
         user = BaseUserFactory()
-        user_create_verify(user_id=user.id, phone=fake.bothify(text='+593#########'))
+        user_create_verify(user_id=user.id, 
+                           phone=fake.bothify(text='+593#########'),
+                           ip_address=fake.ipv4(),
+                           user_agent=fake.user_agent())
         self.assertEqual(1, CallbackToken.objects.count())
 
         with self.assertRaises(ValidationError):
-            self.service(user_id=user.id, token=fake.random_number(digits=6))
+            self.service(user_id=user.id,token=fake.random_number(digits=6))
     
     @ patch('server.authentication.services.validate_token_age')
     def test_service_with_valid_token_and_active_account_user(self, validate_token_age_mock):
@@ -43,7 +46,10 @@ class UserCreate(TestCase):
         # correcto. El atributo del usuario de ´is_active´ pasa a True para poder permitir
         # el inicio de sesión.
         user = BaseUserFactory()
-        user_create_verify(user_id=user.id, phone=fake.bothify(text='+593#########'))
+        user_create_verify(user_id=user.id,
+                           phone=fake.bothify(text='+593#########'),
+                           ip_address=fake.ipv4(),
+                           user_agent=fake.user_agent())
         self.assertEqual(1, CallbackToken.objects.count())
 
         self.service(user_id=user.id, token=CallbackToken.objects.first().key)

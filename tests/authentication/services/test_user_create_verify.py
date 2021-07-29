@@ -16,7 +16,10 @@ class UserCreate(TestCase):
     @ patch('server.authentication.services.user_create_verify')
     def test_service_with_user_not_souch_found(self, user_create_verify_mock):
         with self.assertRaises(ValidationError):
-            self.service(user_id=fake.random_digit(), phone=fake.phone_number())
+            self.service(user_id=fake.random_digit(),
+                        phone=fake.phone_number(),
+                        ip_address=fake.ipv4(),
+                        user_agent=fake.user_agent())
     
     @ patch('server.authentication.services.user_create_verify')
     def test_service_with_phone_none(self, user_create_verify_mock):
@@ -31,14 +34,20 @@ class UserCreate(TestCase):
         self.assertEqual(1, BaseUser.objects.count())
 
         with self.assertRaises(ValidationError):
-            self.service(user_id=user.id, phone=fake.phone_number())
+            self.service(user_id=user.id,
+                         phone=fake.phone_number(),
+                         ip_address=fake.ipv4(),
+                         user_agent=fake.user_agent())
 
     @ patch('server.authentication.services.send_sms_with_callback_token')
     def test_service_with_success(self, send_sms_with_callback_token_mock):
         user = BaseUserFactory()
         self.assertEqual(1, BaseUser.objects.count())
 
-        self.service(user_id=user.id, phone=fake.bothify(text='+593#########'))
+        self.service(user_id=user.id,
+                     phone=fake.bothify(text='+593#########'),
+                     ip_address=fake.ipv4(),
+                     user_agent=fake.user_agent())
         self.assertEqual(1, CallbackToken.objects.count())
         self.assertTrue(send_sms_with_callback_token_mock.called)
     
@@ -47,11 +56,17 @@ class UserCreate(TestCase):
         # Si un usuario ya ha sido notificado con un código el servicio debería
         # invalidar los token previos.
         user = BaseUserFactory()
-        self.service(user_id=user.id, phone=fake.bothify(text='+593#########'))
+        self.service(user_id=user.id, 
+                     phone=fake.bothify(text='+593#########'),
+                     ip_address=fake.ipv4(),
+                     user_agent=fake.user_agent())
         self.assertTrue(CallbackToken.objects.first().is_active)
         self.assertTrue(send_sms_with_callback_token_mock.called)
         # Servicio proporciona un nuevo token (código) e invalida los previos.
-        self.service(user_id=user.id, phone=fake.bothify(text='+593#########'))
+        self.service(user_id=user.id, 
+                     phone=fake.bothify(text='+593#########'),
+                     ip_address=fake.ipv4(),
+                     user_agent=fake.user_agent())
         self.assertTrue(send_sms_with_callback_token_mock.called)
         self.assertEqual(2,  CallbackToken.objects.count())
         #self.assertFalse(CallbackToken.objects.last().is_active)

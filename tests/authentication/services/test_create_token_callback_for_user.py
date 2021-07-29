@@ -18,5 +18,7 @@ class UserCreate(TestCase):
         user = BaseUserFactory()
         self.service(user_id=user.id,
                     alias_type='mobile',
-                    token_type=CallbackToken.TOKEN_TYPE_AUTH)
+                    token_type=CallbackToken.TOKEN_TYPE_AUTH,
+                    ip_address=fake.ipv4(),
+                    user_agent=fake.user_agent())
         self.assertEqual(1, CallbackToken.objects.count())

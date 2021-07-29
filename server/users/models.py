@@ -27,7 +27,7 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="CREADO")
     updated_at = models.DateTimeField(auto_now=True)
 
     # Atributo de inicio de sesión.

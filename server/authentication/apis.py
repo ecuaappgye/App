@@ -40,7 +40,10 @@ class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user_create_verify(user_id=user_id, **serializer.validated_data)
+        user_create_verify(user_id=user_id,
+                           user_agent= request.META.get('HTTP_USER_AGENT'),
+                           ip_address= request.META.get('REMOTE_ADDR'),
+                           **serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
 
