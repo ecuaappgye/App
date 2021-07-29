@@ -14,7 +14,7 @@ from pathlib import Path
 from .cors import *
 from .sessions import *
 from .env_reader import env
-from .sms import *
+from .tokens import *
 from .users import *
 import os
 

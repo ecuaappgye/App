@@ -119,7 +119,9 @@ class UserPasswordReset(ApiErrorsMixin, APIView):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user_password_reset(**serializer.validated_data)
+        user_password_reset(user_agent= request.META.get('HTTP_USER_AGENT'),
+                            ip_address= request.META.get('REMOTE_ADDR'),
+                            **serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
 

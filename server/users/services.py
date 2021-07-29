@@ -1,20 +1,20 @@
 from datetime import datetime
+from server.authentication.selectors import callback_token_by_user_id
+from server.authentication.models import CallbackToken
 from threading import Thread
 
 from config.settings.env_reader import env
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
-from django.utils.encoding import force_str, smart_bytes
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from server.authentication.services import create_token_callback_for_user, invalidate_previous_tokens
+from server.authentication.utils import generate_numeric_token
 from server.users.selectors import user_by_email, user_by_id
-from django.conf import settings
 
 from .models import BaseUser
 from .utils import (send_email_email_change, send_email_password_change,
                     send_email_password_reset_check_for_user,
-                    send_email_password_reset_for_user,
-                    validate_password)
+                    send_email_password_reset_for_user, validate_password)
 
 
 def user_create(*,first_name: str,
@@ -79,23 +79,25 @@ def user_update_profile(*, user_id: int, data) -> BaseUser:
     return user
 
 
-def user_password_reset(*, email: str) -> BaseUser:
+def user_password_reset(*, email: str, ip_address:str, user_agent:str ) -> BaseUser:
     """Servicio que permite enviar un correo electrónico con
     un token para el reestablecimiento de contraseña. En en caso
     de que el correo no sea válido se enviara un error.
 
     Parámetros:
     email -> Correo electrónico del usuario.
+    ip_address ->
+    user_agent ->
     """
     user = user_by_email(email=email)
-    # Envio de correo electrónico utilizando el usuario.
-    # Envío de token en el contexto del parámetro
-    token = user_make_token(email=email)
-    extra_context = {"token": token}
-    # Preparar un nuevo proceso en el sistema operativo.
-    # Envío de email con coste computacional pesado.
-    Thread(target=send_email_password_reset_for_user,
-           args=(user, extra_context)).start()
+    token = create_token_callback_for_user(user_id=user.id,
+                                  alias_type='email',
+                                  token_type=CallbackToken.TOKEN_PASSWORD_RESET,
+                                  ip_address=ip_address,
+                                  user_agent=user_agent )
+    invalidate_previous_tokens(user_id=user.id,
+                              callback_token_id=token.id,
+                              token_type=CallbackToken.TOKEN_PASSWORD_RESET)
 
     return token
 
@@ -106,33 +108,15 @@ def user_password_reset_check(*, token: str, new_password: str, password_confirm
 
     Parámetros:
     token -> Código de verificación
-    new_password -> Nueva contraseña
-    password_confirm -> Nueva contraseña confirmación
+    ip_address -> Nueva contraseña
+    user_agent -> Nueva contraseña confirmación
+    new_password ->
+    password_confirm ->
     """
-    token_user = user_extract_token(token=token)
-    uidb64 = user_extract_uidb64(token=token)
+    if not token:
+        raise ValidationError(settings.VERIFY_TOKEN_FAILED_MESSAGE)
 
-    user = user_check_token(uidb64=uidb64, token=token_user)
-
-    if new_password != password_confirm:
-        raise ValidationError("Contraseñas no coinciden")
-
-    # Validar contraseña con las respectivas limitaciones.
-    # UserAttributeSimilarityValidator
-    # MinimumLengthValidator
-    # CommonPasswordValidator
-    # NumericPasswordValidator
-    validate_password(password=new_password, user=user.email)
-
-    user.set_password(new_password)
-    user.save(update_fields=["password"])
-
-    # Envío de notificaciones utilizando un nuevo proceso
-    # del sisteama operativo.
-    Thread(target=send_email_password_reset_check_for_user,
-           args=(user, None)).start()
-
-    return user
+    return 'user'
 
 
 def user_password_change(*, user_id: int, old_password: str, new_password: str, password_confirm):
@@ -201,69 +185,3 @@ def user_account_active(*, email:str):
         return BaseUser.objects.get(email=email).is_active
     except BaseUser.DoesNotExist:
         return None
-
-# =================
-# Services methods
-# =================
-
-def user_extract_uidb64(*, token: str) -> str:
-    separator = '_'
-    try:
-        # Remover espacios en blanco
-        token_strip = token.strip()
-        # Encontrar separador
-        extract_uidb64 = token_strip.find(separator)
-        if not extract_uidb64 != -1:
-            raise ValidationError('Código inválido.')
-
-        return token[extract_uidb64 + 1:]
-
-    except:
-        raise ValidationError('Código inválido.')
-
-
-def user_extract_token(*, token: str) -> str:
-    separator = '_'
-    try:
-        # Remover espacios en blanco del token.
-        token_strip = token.strip()
-        # Encontrar el separador dentro del token.
-        extract_token = token_strip.find(separator)
-        if not extract_token != -1:
-            raise ValidationError('Código inválido.')
-
-        return token[:extract_token]
-
-    except Exception:
-        raise ValidationError('Código inválido.')
-
-
-def user_check_token(*, uidb64: int, token: str) -> BaseUser:
-    """función que permite chequear el token de la cadena enviada.
-
-    Parámetros:
-    uidb64 Código de id extraido
-    token Código de usuario enviado en la petición
-    """
-    user_id = force_str(urlsafe_base64_decode(uidb64))
-    user = user_by_id(id=user_id)
-
-    # Si el token no esta relacionado al usuario envia error.
-    if not PasswordResetTokenGenerator().check_token(user, token):
-        raise ValidationError('Invalid code.')
-
-    return user
-
-
-def user_make_token(*, email: int):
-    """Servicio que permite crear un token aleatorio con fecha
-    de caducidad detallado en las configuraciones a partir del
-    email del usuario.
-    """
-    separator = "_"
-    user = user_by_email(email=email)
-
-    uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-    token = PasswordResetTokenGenerator().make_token(user)
-
-    return "%s%s%s" % (token, separator, uidb64)

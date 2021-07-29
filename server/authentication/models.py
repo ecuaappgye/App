@@ -1,6 +1,8 @@
+from server.authentication.managers import CallBackTokenManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .utils import generate_numeric_token
+from django.conf import settings
 
 
 class CallbackToken(models.Model):
@@ -12,8 +14,7 @@ class CallbackToken(models.Model):
         (TOKEN_TYPE_VERIFY , 'Verificación'),
         (TOKEN_PASSWORD_RESET, 'Reestablecer contraseña'))
 
-    user = models.ForeignKey(
-        'users.BaseUser', on_delete=models.CASCADE, null=True, blank=True, verbose_name="USUARIO")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, verbose_name="USUARIO")
     key = models.CharField(default=generate_numeric_token, max_length=6, verbose_name="CÓDIGO ENVIADO")
     type = models.CharField(choices=TOKEN_TYPES, max_length=20, verbose_name="TIPO")
     to_alias = models.CharField(blank=True, null=True, max_length=20, verbose_name="TIPO ALIAS")
@@ -24,6 +25,8 @@ class CallbackToken(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="ACTIVO")
 
     created_at = models.DateTimeField(auto_now=True, verbose_name="CREADO")
+
+    objects = CallBackTokenManager()
 
     class Meta:
         app_label = 'authentication'
