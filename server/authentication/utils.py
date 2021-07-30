@@ -16,8 +16,13 @@ def generate_numeric_token():
 def validate_phone_format(*, phone):
     if not phone:
         raise ValidationError(settings.VERIFY_PHONE_FORMAT_INVALID)
-        
     if not re.match(r'^\+593\d{1,12}$', phone):
         raise ValidationError(settings.VERIFY_PHONE_FORMAT_INVALID)
-    
     return phone
+
+def validate_token(*, token, token_compare):
+    if not token:
+        raise ValidationError(settings.VERIFY_TOKEN_FAILED_MESSAGE)
+    if token.strip() != token_compare.strip():
+        raise ValidationError(settings.VERIFY_TOKEN_FAILED_MESSAGE)
+    return token

@@ -1,5 +1,4 @@
 from server.authentication.models import CallbackToken
-from typing import Callable
 from rest_framework.test import APIClient
 from django.test import TestCase
 from server.common.test_utils import fake

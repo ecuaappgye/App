@@ -31,10 +31,14 @@ class UserCreate(TestCase):
         # El servicio se asegura que el código recibido sea correcto.
         # El servicio se asegura de enviar error.
         user = BaseUserFactory()
-        user_create_verify(user_id=user.id, 
-                           phone=fake.bothify(text='+593#########'),
-                           ip_address=fake.ipv4(),
-                           user_agent=fake.user_agent())
+
+        data = {
+            'user_id' : user.id,
+            'phone': fake.bothify(text='+593#########'),
+            'ip_address' :fake.ipv4(),
+            'user_agent' :fake.user_agent()
+        }
+        user_create_verify(data)
         self.assertEqual(1, CallbackToken.objects.count())
 
         with self.assertRaises(ValidationError):
@@ -46,10 +50,15 @@ class UserCreate(TestCase):
         # correcto. El atributo del usuario de ´is_active´ pasa a True para poder permitir
         # el inicio de sesión.
         user = BaseUserFactory()
-        user_create_verify(user_id=user.id,
-                           phone=fake.bothify(text='+593#########'),
-                           ip_address=fake.ipv4(),
-                           user_agent=fake.user_agent())
+
+        data = {
+            'user_id' : user.id,
+            'phone': fake.bothify(text='+593#########'),
+            'ip_address' :fake.ipv4(),
+            'user_agent' :fake.user_agent()
+        }
+
+        user_create_verify(data)
         self.assertEqual(1, CallbackToken.objects.count())
 
         self.service(user_id=user.id, token=CallbackToken.objects.first().key)

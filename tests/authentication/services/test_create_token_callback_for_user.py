@@ -15,10 +15,13 @@ class UserCreate(TestCase):
 
     @ patch('server.authentication.services.create_token_callback_for_user')
     def test_service_user_return_callback_token(self, create_token_callback_for_user_mock):
-        user = BaseUserFactory()
-        self.service(user_id=user.id,
-                    alias_type='mobile',
-                    token_type=CallbackToken.TOKEN_TYPE_AUTH,
-                    ip_address=fake.ipv4(),
-                    user_agent=fake.user_agent())
+        user : BaseUserFactory()
+        data = {
+            'user_id' : user.id,
+            'alias_type':'mobile',
+            'token_type':CallbackToken.TOKEN_TYPE_AUTH,
+            'ip_address':fake.ipv4(),
+            'user_agent':fake.user_agent()
+        }
+        self.service(data)
         self.assertEqual(1, CallbackToken.objects.count())

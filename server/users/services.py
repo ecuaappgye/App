@@ -1,14 +1,16 @@
 from datetime import datetime
-from server.authentication.selectors import callback_token_by_token, callback_token_by_user_id
-from server.authentication.models import CallbackToken
 from threading import Thread
 
 from config.settings.env_reader import env
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
-from server.authentication.services import create_token_callback_for_user, invalidate_previous_tokens
-from server.authentication.utils import generate_numeric_token
+from server.authentication.models import CallbackToken
+from server.authentication.selectors import (callback_token_by_token,
+                                             callback_token_by_user_id)
+from server.authentication.services import (create_token_callback_for_user,
+                                            invalidate_previous_tokens)
+from server.authentication.utils import validate_token
 from server.users.selectors import user_by_email, user_by_id
 
 from .models import BaseUser
@@ -79,22 +81,27 @@ def user_update_profile(*, user_id: int, data) -> BaseUser:
     return user
 
 
-def user_password_reset(*, email: str, ip_address:str, user_agent:str ) -> BaseUser:
+def user_password_reset(*, email: str, ip_address:str, user_agent:str ) -> CallbackToken:
     """Servicio que permite enviar un correo electrónico con
     un token para el reestablecimiento de contraseña. En en caso
     de que el correo no sea válido se enviara un error.
 
     Parámetros:
     email -> Correo electrónico del usuario.
-    ip_address ->
-    user_agent ->
+    ip_address -> Dirección ip de la máquina de petición.
+    user_agent -> Usuario agente de petición.
     """
     user = user_by_email(email=email)
-    token = create_token_callback_for_user(user_id=user.id,
-                                           alias_type='email',
-                                           token_type=CallbackToken.TOKEN_PASSWORD_RESET,
-                                           ip_address=ip_address,
-                                           user_agent=user_agent)
+
+    callback_token_data = {
+        'user_id': user.id, 
+        'alias_type': 'email',
+        'token_type': CallbackToken.TOKEN_PASSWORD_RESET,
+        'ip_address': ip_address,
+        'user_agent': user_agent
+    }
+
+    token = create_token_callback_for_user(data = callback_token_data)
     invalidate_previous_tokens(callback_token=token)
 
     return token
@@ -111,15 +118,11 @@ def user_password_reset_check(*, token: str, new_password: str, password_confirm
     new_password ->
     password_confirm ->
     """
-    if not token:
-        raise ValidationError(settings.VERIFY_TOKEN_FAILED_MESSAGE)
-
     if new_password != password_confirm:
-        raise ValidationError("Contraseñas no coinciden.")
+        raise ValidationError(settings.USER_PASSWORD_NO_MATCH)
 
     token_user = callback_token_by_token(token=token)
-    if token.strip() != token_user.key.strip():
-        raise ValidationError(settings.VERIFY_TOKEN_FAILED_MESSAGE)
+    validate_token(token=token, token_compare=token_user.key)
 
     user = user_by_id(id=token_user.user.id)
     validate_password(password=new_password, user=user)

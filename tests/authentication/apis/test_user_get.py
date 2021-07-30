@@ -5,7 +5,6 @@ from rest_framework.test import APIClient
 from server.common.test_utils import fake
 from server.users.factories import BaseUserFactory
 from server.users.models import BaseUser
-from server.users.services import user_create
 
 
 class TestUserGetApi(TestCase):
@@ -44,12 +43,7 @@ class TestUserGetApi(TestCase):
         # "phone": user.phone
         
         email, password= fake.email(), fake.password()
-        user = BaseUserFactory(email=email, password=password)
-        # ....
-        x=BaseUser.objects.get(id=user.id)
-        x.is_active=True
-        x.save()
-
+        user = BaseUserFactory(email=email, password=password, is_active=True)
         is_logged = self.client.login(email=email, password=password)
         self.assertTrue(is_logged)
         

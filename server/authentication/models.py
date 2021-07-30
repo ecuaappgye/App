@@ -16,9 +16,9 @@ class CallbackToken(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, verbose_name="USUARIO")
     key = models.CharField(default=generate_numeric_token, max_length=6, verbose_name="CÓDIGO ENVIADO")
-    type = models.CharField(choices=TOKEN_TYPES, max_length=20, verbose_name="TIPO")
-    to_alias = models.CharField(blank=True, null=True, max_length=20, verbose_name="TIPO ALIAS")
-    to_alias_type = models.CharField(blank=True, null=True, max_length=20, verbose_name="PARA ALIAS TIPO")
+    type = models.CharField(choices=TOKEN_TYPES, max_length=30, verbose_name="TIPO")
+    to_alias = models.CharField(blank=True, null=True, max_length=30, verbose_name="TIPO ALIAS")
+    to_alias_type = models.CharField(blank=True, null=True, max_length=30, verbose_name="PARA ALIAS TIPO")
     ip_address = models.GenericIPAddressField(blank=True, null=True, default='', verbose_name="DIRECCIÓN IP DE LA PETICIÓN")
     user_agent = models.CharField(max_length=256, verbose_name="DISPOSITIVO DE PETICIÓN", default="", blank=True, null=True)
 

@@ -2,7 +2,6 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from server.common.test_utils import fake
 from django.urls import reverse
-from server.users.services import user_create
 from server.users.models import BaseUser
 from server.users.factories import BaseUserFactory
 from django.contrib.sessions.models import Session
