@@ -174,10 +174,11 @@ def user_email_change(*, user_id, email):
 # Sessions
 # =============
 
-def user_unique_session(*, user):
-    # Eliminar sesión si ya existe el usuario.
-    # Borrar la sesión del usuario actual de la base de datos.
-    # Denegar el acceso al usuario.
+def user_unique_session(*, user: BaseUser):
+    """Eliminar sesión si ya existe el usuario.
+    Borrar la sesión del usuario actual de la base de datos.
+    Denegar el acceso al usuario.
+    """
     sessions = Session.objects.filter(expire_date__gte=datetime.now())
     if not sessions:
         return None
@@ -190,11 +191,13 @@ def user_unique_session(*, user):
                 return True
 
 
-def user_account_active(*, email:str):
+def user_account_active(*, credentials:str):
     """Función que permite determinar si la cuenta de un usuario 
     está activa.
     """
     try:
-        return BaseUser.objects.get(email=email).is_active
+        if not BaseUser.objects.get(email=credentials.get('email')).is_active:
+            raise ValidationError(settings.USER_ACCOUNT_INACTIVE)
+        
     except BaseUser.DoesNotExist:
         return None

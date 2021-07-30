@@ -1,4 +1,4 @@
-import email
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -28,8 +28,7 @@ class UserRegisterApi(ApiErrorsMixin, APIView):
 
         user = user_create(**serializer.validated_data)
 
-        return Response({'user_id': user.id, 'is_active':user.is_active},
-                        status=status.HTTP_201_CREATED)
+        return Response({'user_id': user.id, 'is_active':user.is_active},status=status.HTTP_201_CREATED)
 
 
 class UserRegisterVerifyApi(ApiErrorsMixin, APIView):
@@ -78,7 +77,7 @@ class UserUpdateApi(ApiErrorsMixin, ApiAuthMixin, APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class UserLoginApi(APIView):
+class UserLoginApi(ApiErrorsMixin, APIView):
     class OutputSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField()
@@ -86,17 +85,15 @@ class UserLoginApi(APIView):
     def post(self, request):
         serializer = self.OutputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        if user_account_active(email=email) is False:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        user_account_active(credentials=serializer.validated_data)
 
         user = authenticate(request, **serializer.validated_data)
         if user is None:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-        session = user_unique_session(user=user)
-        if session is not None:
-            return Response(status=status.HTTP_409_CONFLICT)
+        if user_unique_session(user=user) is not None:
+            return Response(settings.USER_ACCOUNT_MULTIPLE, status=status.HTTP_401_UNAUTHORIZED)
 
         login(request, user)
         data = user_data(user=user)
