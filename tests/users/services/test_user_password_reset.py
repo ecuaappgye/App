@@ -21,7 +21,7 @@ class UserPasswordReset(TestCase):
                 'ip_address' :fake.ipv4(),
                 'user_agent' :fake.user_agent()
             }
-            self.service(data)
+            self.service(**data)
 
     @ patch('server.users.services.user_password_reset')
     def test_service_with_success_and_call_event(self, send_email_password_reset_for_user_mock):

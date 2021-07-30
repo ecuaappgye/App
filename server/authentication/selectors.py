@@ -1,8 +1,8 @@
-from typing import ClassVar
-
 from django.conf import settings
-from .models import CallbackToken
 from django.core.exceptions import ValidationError
+from server.users.models import BaseUser
+
+from .models import CallbackToken
 
 
 def callback_token_by_user_id(*, id: int) -> CallbackToken:

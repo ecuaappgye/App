@@ -1,7 +1,7 @@
 from typing import Iterator
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import  ValidationError
 from django.utils import timezone
 from server.users.selectors import user_by_id
 from twilio.rest import Client
@@ -48,7 +48,7 @@ def user_create_verify_check(*, user_id: int, token: str):
     token -> Código de verificación enviado al móvil.
     """
     token_user = callback_token_by_user_id(id=user_id)
-    validate_token(token=token, token_compare=token_user)
+    validate_token(token=token, token_compare=token_user.key)
     validate_token_age(callbacktoken=token_user)
 
     user = user_by_id(id=user_id)
@@ -118,13 +118,18 @@ def validate_token_age(*, callbacktoken: CallbackToken):
 
 
 def create_token_callback_for_user(*, data):    
-    token = CallbackToken(user_id=data.get('user_id'),
-                          to_alias_type=data.get('alias_type').upper(),
-                          to_alias=data.get('alias_type'),
-                          type=data.get('token_type'),
-                          user_agent=data.get('user_agent'),
-                          ip_address=data.get('ip_address'))
-    token.save()
+    try:
+        token = CallbackToken(user_id=data.get('user_id'),
+                             to_alias_type=data.get('alias_type').upper(),
+                             to_alias=data.get('alias_type'),
+                             type=data.get('token_type'),
+                             user_agent=data.get('user_agent'),
+                             ip_address=data.get('ip_address'))
+        token.save()
 
-    return token
+        return token
+    except CallbackToken.DoesNotExist:
+        raise ValidationError(settings.VERIFY_TOKEN_NOT_USER)
+
+
 
