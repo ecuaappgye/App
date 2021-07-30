@@ -1,5 +1,5 @@
 from datetime import datetime
-from server.authentication.selectors import callback_token_by_user_id
+from server.authentication.selectors import callback_token_by_token, callback_token_by_user_id
 from server.authentication.models import CallbackToken
 from threading import Thread
 
@@ -91,13 +91,11 @@ def user_password_reset(*, email: str, ip_address:str, user_agent:str ) -> BaseU
     """
     user = user_by_email(email=email)
     token = create_token_callback_for_user(user_id=user.id,
-                                  alias_type='email',
-                                  token_type=CallbackToken.TOKEN_PASSWORD_RESET,
-                                  ip_address=ip_address,
-                                  user_agent=user_agent )
-    invalidate_previous_tokens(user_id=user.id,
-                              callback_token_id=token.id,
-                              token_type=CallbackToken.TOKEN_PASSWORD_RESET)
+                                           alias_type='email',
+                                           token_type=CallbackToken.TOKEN_PASSWORD_RESET,
+                                           ip_address=ip_address,
+                                           user_agent=user_agent)
+    invalidate_previous_tokens(callback_token=token)
 
     return token
 
@@ -116,7 +114,19 @@ def user_password_reset_check(*, token: str, new_password: str, password_confirm
     if not token:
         raise ValidationError(settings.VERIFY_TOKEN_FAILED_MESSAGE)
 
-    return 'user'
+    if new_password != password_confirm:
+        raise ValidationError("Contraseñas no coinciden.")
+
+    token_user = callback_token_by_token(token=token)
+    if token.strip() != token_user.key.strip():
+        raise ValidationError(settings.VERIFY_TOKEN_FAILED_MESSAGE)
+
+    user = user_by_id(id=token_user.user.id)
+    validate_password(password=new_password, user=user)
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
+
+    return user
 
 
 def user_password_change(*, user_id: int, old_password: str, new_password: str, password_confirm):

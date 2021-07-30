@@ -76,7 +76,7 @@ def send_sms_with_callback_token(*, phone: str, key: str):
     # return 'message'
 
 
-def invalidate_previous_tokens(*, user_id: int, callback_token_id: int, token_type):
+def invalidate_previous_tokens(*, callback_token: CallbackToken):
     """Cuando se emite un nuevo hay que desactivar todos los
     token relacionados con ese usuario.
 
@@ -84,7 +84,8 @@ def invalidate_previous_tokens(*, user_id: int, callback_token_id: int, token_ty
     user_id -> Identificador del usuario en sesión
     callback_token_id -> Identificador de la instancia del token.
     """
-    tokens = CallbackToken.objects.active().filter(user_id=user_id, type=token_type).exclude(id=callback_token_id)
+    tokens = CallbackToken.objects.active().filter(user_id=callback_token.user.id, 
+                     type=callback_token.type).exclude(id=callback_token.id)
     if not tokens:
         return None
 
