@@ -42,14 +42,14 @@ class TestUserLoginApi(TestCase):
             'password': password
         }
         response = self.client.post(self.url, credentials)
-        self.assertEqual(401, response.status_code)
+        self.assertEqual(400, response.status_code)
     
     def test_api_with_already_session(self):
         # Si un usuario ha iniciado sessión con anterioridad y su
         # sesión aun continúa activa la api no deberá permitir el 
         # acceso y deberá responder 409 conflicto.
         # Elimina la sesión del usuario actualmente logueado con esas
-        # credeciales.
+        # credenciales.
         # En ésta prueba se simula el proceso de haber confirmado el 
         # código enviado al celular.
         # El campo ´is_active´ en True permite simular este proceso.
@@ -65,7 +65,7 @@ class TestUserLoginApi(TestCase):
         self.assertEqual(409, response_already_login.status_code)
         self.assertEqual(0, Session.objects.count())
 
-    def test_api_with_invalid_credentials(self):
+    def test_api_with_invalid_credentials_with_account_active(self):
         # Si un usuario envía credenciales inválidas no permite acceso.
         # Api responde con estado 401
         email =  fake.email()

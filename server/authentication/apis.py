@@ -1,15 +1,16 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.core.exceptions import ValidationError
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from server.api.mixins import ApiAuthMixin, ApiErrorsMixin
 from server.users.selectors import user_by_email, user_by_id, user_data
-from server.users.services import (user_account_active, user_create,
-                                   user_email_change, user_password_change,
-                                   user_password_reset,
+from server.users.services import (user_account_active, user_already_session,
+                                   user_create, user_email_change,
+                                   user_password_change, user_password_reset,
                                    user_password_reset_check,
-                                   user_unique_session, user_update_profile)
+                                   user_update_profile)
 
 from .services import user_create_verify, user_create_verify_check
 
@@ -90,10 +91,10 @@ class UserLoginApi(ApiErrorsMixin, APIView):
 
         user = authenticate(request, **serializer.validated_data)
         if user is None:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(settings.USER_ACCOUNT_INVALID_CREDENTIALS, status=status.HTTP_401_UNAUTHORIZED)
 
-        if user_unique_session(user=user) is not None:
-            return Response(settings.USER_ACCOUNT_MULTIPLE, status=status.HTTP_401_UNAUTHORIZED)
+        if user_already_session(user=user):
+            return Response(settings.USER_ACCOUNT_MULTIPLE, status=status.HTTP_409_CONFLICT)
 
         login(request, user)
         data = user_data(user=user)

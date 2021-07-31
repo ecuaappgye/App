@@ -174,7 +174,7 @@ def user_email_change(*, user_id, email):
 # Sessions
 # =============
 
-def user_unique_session(*, user: BaseUser):
+def user_already_session(*, user: BaseUser):
     """Eliminar sesión si ya existe el usuario.
     Borrar la sesión del usuario actual de la base de datos.
     Denegar el acceso al usuario.
@@ -194,6 +194,9 @@ def user_unique_session(*, user: BaseUser):
 def user_account_active(*, credentials:str):
     """Función que permite determinar si la cuenta de un usuario 
     está activa.
+
+    Parámetros:
+    credentials -> Credenciales de inicio de sesión. (Extracción de email)
     """
     try:
         if not BaseUser.objects.get(email=credentials.get('email')).is_active:
